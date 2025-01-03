@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Post, UseInterceptors } from '@nestjs/common';
+import { ApiOperation } from '@nestjs/swagger';
+
 import { AuthService } from './auth.service';
+import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
 import { SignupValidationInterceptor } from './interceptors/signup.interceptor';
-import { SigninDto } from './dto/signin.dto';
-import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {

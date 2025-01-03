@@ -1,10 +1,15 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from './auth.service';
-import { User, UserRole } from './entities/user.entity';
-import { SignupDto } from './dto/signup.dto';
 import { UserRepository } from '@infra/database/prisma/repositories/user/user.repository';
-import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+
+import { AuthService } from './auth.service';
 import { SigninDto } from './dto/signin.dto';
+import { SignupDto } from './dto/signup.dto';
+import { User, UserRole } from './entities/user.entity';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -19,9 +24,9 @@ describe('AuthService', () => {
           useValue: {
             create: jest.fn().mockResolvedValue(null),
             findByCpf: jest.fn().mockResolvedValue(null),
-            findByEmail: jest.fn().mockResolvedValue(null)
-          }
-        }
+            findByEmail: jest.fn().mockResolvedValue(null),
+          },
+        },
       ],
     }).compile();
 
@@ -42,15 +47,15 @@ describe('AuthService', () => {
         password: '12345678',
         cpf: '12345678910',
         cityId: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
-        role: UserRole.ADMIN
-      }
+        role: UserRole.ADMIN,
+      };
 
-      await service.signup(signupInput)
+      await service.signup(signupInput);
 
-      expect(userRepository.create).toHaveBeenCalledTimes(1)
-    })
+      expect(userRepository.create).toHaveBeenCalledTimes(1);
+    });
 
-    it("should throw a conflict exception with cpf", async () => {
+    it('should throw a conflict exception with cpf', async () => {
       const user: User = {
         id: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
         name: 'John',
@@ -61,21 +66,23 @@ describe('AuthService', () => {
         cityId: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
         role: UserRole.ADMIN,
         createdAt: new Date(),
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      };
 
-      const conflictException = new ConflictException(`user with cpf ${user.cpf} already exists`)
+      const conflictException = new ConflictException(
+        `user with cpf ${user.cpf} already exists`,
+      );
 
-      jest.spyOn(userRepository, "findByCpf").mockResolvedValueOnce(user);
+      jest.spyOn(userRepository, 'findByCpf').mockResolvedValueOnce(user);
 
       const signupInput: SignupDto = {
-        ...user
-      }
+        ...user,
+      };
 
-      expect(service.signup(signupInput)).rejects.toEqual(conflictException)
-    })
+      expect(service.signup(signupInput)).rejects.toEqual(conflictException);
+    });
 
-    it("should throw a conflict exception with email", async () => {
+    it('should throw a conflict exception with email', async () => {
       const user: User = {
         id: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
         name: 'John',
@@ -86,84 +93,92 @@ describe('AuthService', () => {
         cityId: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
         role: UserRole.ADMIN,
         createdAt: new Date(),
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      };
 
-      const conflictException = new ConflictException(`user with email ${user.email} already exists`)
+      const conflictException = new ConflictException(
+        `user with email ${user.email} already exists`,
+      );
 
-      jest.spyOn(userRepository, "findByEmail").mockResolvedValueOnce(user);
+      jest.spyOn(userRepository, 'findByEmail').mockResolvedValueOnce(user);
 
       const signupInput: SignupDto = {
-        ...user
-      }
+        ...user,
+      };
 
-      expect(service.signup(signupInput)).rejects.toEqual(conflictException)
-    })
-  })
+      expect(service.signup(signupInput)).rejects.toEqual(conflictException);
+    });
+  });
 
   describe('signin', () => {
-    it("should signin an user", async () => {
+    it('should signin an user', async () => {
       const user: User = {
         id: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
         name: 'John',
         surname: 'Doe',
         email: 'john@doe.com',
-        password: '$2b$10$C3B2DiJugzy1JlkRW2a.YuehWjYMpB307Qg860GgNG0N4Fhfsfhei',
+        password:
+          '$2b$10$C3B2DiJugzy1JlkRW2a.YuehWjYMpB307Qg860GgNG0N4Fhfsfhei',
         cpf: '12345678910',
         cityId: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
         role: UserRole.ADMIN,
         createdAt: new Date(),
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      };
 
-      jest.spyOn(userRepository, "findByCpf").mockResolvedValueOnce(user);
+      jest.spyOn(userRepository, 'findByCpf').mockResolvedValueOnce(user);
 
       const signinInput: SigninDto = {
         cpf: '12345678910',
         password: '12345678',
-      }
+      };
 
-      const token = await service.signin(signinInput)
+      const token = await service.signin(signinInput);
 
-      expect(userRepository.findByCpf).toHaveBeenCalledTimes(1)
-      expect(token).toBeDefined()
-    })
+      expect(userRepository.findByCpf).toHaveBeenCalledTimes(1);
+      expect(token).toBeDefined();
+    });
 
-    it("should throw a not found exception because user not found", async () => {
+    it('should throw a not found exception because user not found', async () => {
       const signinInput: SigninDto = {
         cpf: '12345678910',
         password: '12345678',
-      }
+      };
 
-      const notFoundException = new NotFoundException(`user with cpf ${signinInput.cpf} not found`)
+      const notFoundException = new NotFoundException(
+        `user with cpf ${signinInput.cpf} not found`,
+      );
 
-      expect(service.signin(signinInput)).rejects.toEqual(notFoundException)
-    })
+      expect(service.signin(signinInput)).rejects.toEqual(notFoundException);
+    });
 
-    it("should throw a bad request exception because credentials do not match", async () => {
+    it('should throw a bad request exception because credentials do not match', async () => {
       const user: User = {
         id: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
         name: 'John',
         surname: 'Doe',
         email: 'john@doe.com',
-        password: '$2b$10$C3B2DiJugzy1JlkRW2a.YuehWjYMpB307Qg860GgNG0N4Fhfsfhei',
+        password:
+          '$2b$10$C3B2DiJugzy1JlkRW2a.YuehWjYMpB307Qg860GgNG0N4Fhfsfhei',
         cpf: '12345678910',
         cityId: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
         role: UserRole.ADMIN,
         createdAt: new Date(),
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      };
 
-      jest.spyOn(userRepository, "findByCpf").mockResolvedValueOnce(user);
+      jest.spyOn(userRepository, 'findByCpf').mockResolvedValueOnce(user);
 
       const signinInput: SigninDto = {
         cpf: '12345678910',
         password: '123456789',
-      }
+      };
 
-      const badRequestException = new BadRequestException('credentials do not match')
+      const badRequestException = new BadRequestException(
+        'credentials do not match',
+      );
 
-      expect(service.signin(signinInput)).rejects.toEqual(badRequestException)
-    })
-  })
+      expect(service.signin(signinInput)).rejects.toEqual(badRequestException);
+    });
+  });
 });

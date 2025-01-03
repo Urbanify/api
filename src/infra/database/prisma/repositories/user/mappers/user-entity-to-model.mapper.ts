@@ -1,5 +1,5 @@
-import { Prisma } from "@prisma/client"
-import { User } from "src/modules/auth/entities/user.entity"
+import { Prisma } from '@prisma/client';
+import { User } from 'src/modules/auth/entities/user.entity';
 
 export class UserEntityToModelMapper {
   public static map({
@@ -10,7 +10,7 @@ export class UserEntityToModelMapper {
     password,
     cpf,
     cityId,
-    role, 
+    role,
     createdAt,
     updatedAt,
   }: User): Prisma.UserCreateArgs {
@@ -23,12 +23,12 @@ export class UserEntityToModelMapper {
         password,
         cpf,
         cityId,
-        role, 
+        role,
         createdAt,
         updatedAt,
-      }
-    }
+      },
+    };
 
-    return args
+    return args;
   }
 }

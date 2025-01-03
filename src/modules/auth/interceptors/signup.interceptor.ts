@@ -1,15 +1,23 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor, UnauthorizedException } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Observable } from 'rxjs';
+
 import { UserRole } from '../entities/user.entity';
 
 @Injectable()
 export class SignupValidationInterceptor implements NestInterceptor {
-  constructor(
-    private readonly configService: ConfigService
-  ) {}
+  constructor(private readonly configService: ConfigService) {}
 
-  async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
+  async intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
 
     const { role, cityId } = request?.body;
@@ -20,7 +28,7 @@ export class SignupValidationInterceptor implements NestInterceptor {
 
     if (role === UserRole.ADMIN) {
       const apiKey = request?.headers['api-key'];
-      
+
       if (!apiKey) {
         throw new UnauthorizedException();
       }

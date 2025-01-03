@@ -1,4 +1,4 @@
-import { User } from "src/modules/auth/entities/user.entity"
+import { User } from 'src/modules/auth/entities/user.entity';
 
 export class UserModelToEntityMapper {
   public static map({
@@ -24,6 +24,6 @@ export class UserModelToEntityMapper {
       role,
       createdAt,
       updatedAt,
-    }
+    };
   }
 }

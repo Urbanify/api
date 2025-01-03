@@ -3,7 +3,7 @@ export enum UserRole {
   MANAGER = 'MANAGER',
   OWNER = 'OWNER',
   ADMIN = 'ADMIN',
-  FINANCIAL = 'FINANCIAL'
+  FINANCIAL = 'FINANCIAL',
 }
 
 export class User {
@@ -14,7 +14,7 @@ export class User {
   password: string;
   cpf: string;
   cityId?: string;
-  role: UserRole; 
+  role: UserRole;
   createdAt: Date;
   updatedAt: Date;
 }
