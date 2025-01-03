@@ -5,9 +5,9 @@ import {
   NestInterceptor,
   UnauthorizedException,
 } from '@nestjs/common';
+import { env } from '@shared/env';
 import { Observable } from 'rxjs';
 
-import { env } from '@shared/env';
 import { UserRole } from '../entities/user.entity';
 
 @Injectable()

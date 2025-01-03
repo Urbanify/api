@@ -1,8 +1,9 @@
+import { FeatureFlagRepository } from '@infra/database/prisma/repositories/feature-flag/feature-flag.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { UUIDGenerator } from '@shared/uuid-generator';
+
 import { CreateFeatureFlagDto } from './dto/create-feature-flag.dto';
 import { UpdateFeatureFlagDto } from './dto/update-feature-flag.dto';
-import { FeatureFlagRepository } from '@infra/database/prisma/repositories/feature-flag/feature-flag.repository';
-import { UUIDGenerator } from '@shared/uuid-generator';
 
 @Injectable()
 export class FeatureFlagService {

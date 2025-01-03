@@ -9,10 +9,11 @@ import {
   Post,
   UseInterceptors,
 } from '@nestjs/common';
+
 import { CreateFeatureFlagDto } from './dto/create-feature-flag.dto';
+import { UpdateFeatureFlagDto } from './dto/update-feature-flag.dto';
 import { FeatureFlagService } from './feature-flag.service';
 import { FeatureFlagValidationInterceptor } from './interceptors/feature-flag.interceptor';
-import { UpdateFeatureFlagDto } from './dto/update-feature-flag.dto';
 
 @UseInterceptors(FeatureFlagValidationInterceptor)
 @Controller('feature-flags')

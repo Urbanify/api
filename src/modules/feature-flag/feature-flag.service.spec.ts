@@ -1,10 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { FeatureFlagService } from './feature-flag.service';
 import { FeatureFlagRepository } from '@infra/database/prisma/repositories/feature-flag/feature-flag.repository';
+import { NotFoundException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+
 import { CreateFeatureFlagDto } from './dto/create-feature-flag.dto';
 import { UpdateFeatureFlagDto } from './dto/update-feature-flag.dto';
 import { FeatureFlag } from './entities/feature-flag.entity';
-import { NotFoundException } from '@nestjs/common';
+import { FeatureFlagService } from './feature-flag.service';
 
 describe('FeatureFlagService', () => {
   let service: FeatureFlagService;
