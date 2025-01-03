@@ -5,14 +5,14 @@ import {
   NestInterceptor,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Observable } from 'rxjs';
 
+import { env } from '@shared/env';
 import { UserRole } from '../entities/user.entity';
 
 @Injectable()
 export class SignupValidationInterceptor implements NestInterceptor {
-  constructor(private readonly configService: ConfigService) {}
+  constructor() {}
 
   async intercept(
     context: ExecutionContext,
@@ -33,7 +33,7 @@ export class SignupValidationInterceptor implements NestInterceptor {
         throw new UnauthorizedException();
       }
 
-      if (apiKey !== this.configService.get('API_KEY')) {
+      if (apiKey !== env.apiKey) {
         throw new UnauthorizedException();
       }
     }

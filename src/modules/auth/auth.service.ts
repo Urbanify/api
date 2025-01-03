@@ -7,14 +7,17 @@ import {
 } from '@nestjs/common';
 import { UUIDGenerator } from '@shared/uuid-generator';
 import { compare, hash } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
 
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly jwtService: JwtService,
+  ) {}
 
   public async signup(signupDto: SignupDto) {
     const cpf = signupDto.cpf;
@@ -74,7 +77,7 @@ export class AuthService {
       },
     };
 
-    const token = sign(payload, process.env.JWT_SECRET, { expiresIn: '8h' });
+    const token = await this.jwtService.signAsync(payload);
 
     return {
       token,
