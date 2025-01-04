@@ -51,7 +51,7 @@ describe('FeatureFlagService', () => {
   });
 
   describe('update', () => {
-    it('should udpate a feature flag', async () => {
+    it('should update a feature flag', async () => {
       const featureFlag: FeatureFlag = {
         id: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
         slug: 'ff',
@@ -74,7 +74,7 @@ describe('FeatureFlagService', () => {
       expect(featureFlagRepository.update).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw a not found exception because feature flag not found', async () => {
+    it('should throw a not found exception when feature flag not found', async () => {
       const id = 'id';
 
       const updateInput: UpdateFeatureFlagDto = {
@@ -111,7 +111,7 @@ describe('FeatureFlagService', () => {
       expect(featureFlagRepository.delete).toHaveBeenCalledTimes(1);
     });
 
-    it('should throw a not found exception because feature flag not found', async () => {
+    it('should throw a not found exception when feature flag not found', async () => {
       const id = 'id';
 
       const notFoundException = new NotFoundException(

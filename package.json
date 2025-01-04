@@ -101,9 +101,9 @@
       "!**/*.interceptor.(t|j)s",
       "!**/*.entity.(t|j)s",
       "!**/*.decorator.(t|j)s",
-      "!**/*env.(t|j)s",
-      "!**/*app.service.(t|j)s",
-      "!**/*main.(t|j)s"
+      "!./shared/env.(t|j)s",
+      "!./app.service.ts",
+      "!./main.ts"
     ],
     "coverageThreshold": {
       "global": {
