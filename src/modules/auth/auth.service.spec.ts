@@ -4,6 +4,7 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { AuthService } from './auth.service';
@@ -14,6 +15,7 @@ import { User, UserRole } from './entities/user.entity';
 describe('AuthService', () => {
   let service: AuthService;
   let userRepository: UserRepository;
+  let jwtService: JwtService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -27,15 +29,24 @@ describe('AuthService', () => {
             findByEmail: jest.fn().mockResolvedValue(null),
           },
         },
+        {
+          provide: JwtService,
+          useValue: {
+            signAsync: jest.fn().mockResolvedValue('token'),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
     userRepository = module.get<UserRepository>(UserRepository);
+    jwtService = module.get<JwtService>(JwtService);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+    expect(userRepository).toBeDefined();
+    expect(jwtService).toBeDefined();
   });
 
   describe('signup', () => {

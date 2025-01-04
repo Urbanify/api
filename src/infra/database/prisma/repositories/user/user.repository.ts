@@ -9,12 +9,10 @@ import { PrismaService } from '../../prisma.service';
 export class UserRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  public async create(user: User): Promise<User> {
+  public async create(user: User): Promise<void> {
     const data = UserEntityToModelMapper.map(user);
 
-    const userModel = await this.prismaService.user.create(data);
-
-    return UserModelToEntityMapper.map(userModel);
+    await this.prismaService.user.create(data);
   }
 
   public async findByCpf(cpf: string): Promise<User | null> {
