@@ -10,10 +10,24 @@ export class FeatureFlagRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   public async create(featureFlag: FeatureFlag): Promise<void> {
+    const cities = await this.prismaService.city.findMany();
+
+    const cityFeatures = cities.map((city) => ({
+      cityId: city.id,
+      status: false,
+    }));
+
     const data = FeatureFlagEntityToModelMapper.map(featureFlag);
 
     await this.prismaService.featureFlag.create({
-      data,
+      data: {
+        ...data,
+        cityFeatures: {
+          createMany: {
+            data: cityFeatures,
+          },
+        },
+      },
     });
   }
 
@@ -29,6 +43,16 @@ export class FeatureFlagRepository {
     }
 
     return FeatureFlagModelToEntityMapper.map(featureFlagModel);
+  }
+
+  public async list(): Promise<FeatureFlag[]> {
+    const featureFlagModels = await this.prismaService.featureFlag.findMany();
+
+    const entities = featureFlagModels.map((featureFlagModel) =>
+      FeatureFlagModelToEntityMapper.map(featureFlagModel),
+    );
+
+    return entities;
   }
 
   public async update(featureFlag: FeatureFlag): Promise<void> {

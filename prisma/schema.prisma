@@ -47,6 +47,37 @@ model FeatureFlag {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  cityFeatures CityFeature[]
+
   @@index([deleted])
   @@map("feature_flags")
+}
+
+model City {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  latitude  String
+  longitude String
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  cityFeatures CityFeature[]
+
+  @@map("cities")
+}
+
+model CityFeature {
+  id            String   @id @default(uuid()) @db.Uuid
+  cityId        String   @db.Uuid
+  featureFlagId String   @db.Uuid
+  status        Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  city        City        @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  featureFlag FeatureFlag @relation(fields: [featureFlagId], references: [id], onDelete: Cascade)
+
+  @@unique([cityId, featureFlagId])
+  @@map("city_features")
 }
