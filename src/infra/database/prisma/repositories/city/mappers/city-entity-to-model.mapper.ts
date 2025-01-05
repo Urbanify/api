@@ -1,4 +1,4 @@
-import { City } from 'src/modules/city/entities/city.entity';
+import { City } from '@modules/city/entities/city.entity';
 
 export class CityEntityToModelMapper {
   public static map({

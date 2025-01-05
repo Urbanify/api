@@ -1,5 +1,5 @@
+import { City, CityStatus } from '@modules/city/entities/city.entity';
 import { CityStatus as PrimaCityStatus } from '@prisma/client';
-import { City, CityStatus } from 'src/modules/city/entities/city.entity';
 
 export class CityModelToEntityMapper {
   public static map({

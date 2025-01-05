@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { City } from 'src/modules/city/entities/city.entity';
 
 import { CityEntityToModelMapper } from './mappers/city-entity-to-model.mapper';
 import { CityModelToEntityMapper } from './mappers/city-model-to-entity.mapper';
 import { PrismaService } from '../../prisma.service';
+import { City } from '@modules/city/entities/city.entity';
 
 @Injectable()
 export class CityRepository {

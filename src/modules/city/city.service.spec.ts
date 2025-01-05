@@ -8,7 +8,7 @@ import { UserType } from '@shared/decorators/active-user.decorator';
 import { CityService } from './city.service';
 import { CreateCityDto } from './dto/create-city.dto';
 import { UpdateCityDto } from './dto/update-city.dto';
-import { City } from './entities/city.entity';
+import { City, CityStatus } from './entities/city.entity';
 import { UserRole } from '../auth/entities/user.entity';
 
 describe('CityService', () => {
@@ -78,7 +78,7 @@ describe('CityService', () => {
         name: 'My city',
         latitude: 'latitude',
         longitude: 'longitude',
-        status: true,
+        status: CityStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
         featureFlags: [
@@ -118,7 +118,7 @@ describe('CityService', () => {
         name: 'My city',
         latitude: 'latitude',
         longitude: 'longitude',
-        status: true,
+        status: CityStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
         featureFlags: [
@@ -140,7 +140,7 @@ describe('CityService', () => {
         name: 'My city',
         latitude: 'latitude',
         longitude: 'longitude',
-        status: true,
+        status: CityStatus.ACTIVE,
         featureFlags: [
           {
             cityId: '2041dbfb-f0ee-43d2-9566-c041a1949207',
@@ -167,7 +167,7 @@ describe('CityService', () => {
         name: 'My city',
         latitude: 'latitude',
         longitude: 'longitude',
-        status: true,
+        status: CityStatus.ACTIVE,
         featureFlags: [
           {
             cityId: id,
@@ -197,7 +197,7 @@ describe('CityService', () => {
           name: 'My city',
           latitude: 'latitude',
           longitude: 'longitude',
-          status: true,
+          status: CityStatus.ACTIVE,
           createdAt: new Date(),
           updatedAt: new Date(),
           featureFlags: [
@@ -232,7 +232,7 @@ describe('CityService', () => {
         name: 'My city',
         latitude: 'latitude',
         longitude: 'longitude',
-        status: true,
+        status: CityStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
         featureFlags: [

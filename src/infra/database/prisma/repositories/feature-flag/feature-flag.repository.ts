@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { FeatureFlag } from 'src/modules/feature-flag/entities/feature-flag.entity';
 
 import { FeatureFlagEntityToModelMapper } from './mappers/feature-flag-entity-to-model.mapper';
 import { FeatureFlagModelToEntityMapper } from './mappers/feature-flag-model-to-entity.mapper';
 import { PrismaService } from '../../prisma.service';
+import { FeatureFlag } from '@modules/feature-flag/entities/feature-flag.entity';
 
 @Injectable()
 export class FeatureFlagRepository {

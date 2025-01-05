@@ -14,9 +14,9 @@ import { AuthValidationInterceptor } from '@shared/interceptors/auth.interceptor
 
 import { CityService } from './city.service';
 import { CreateCityDto } from './dto/create-city.dto';
+import { GetCityByIdResponseDto } from './dto/get-city-by-id.dto';
 import { ListCitiesResponseDto } from './dto/list-cities.dto';
 import { UpdateCityDto } from './dto/update-city.dto';
-import { GetCityByIdResponseDto } from './dto/get-city-by-id.dto';
 
 @Controller('cities')
 export class CityController {
