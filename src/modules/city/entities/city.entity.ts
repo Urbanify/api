@@ -1,9 +1,16 @@
+export enum CityStatus {
+  ACTIVE = 'ACTIVE',
+  OVERDUE = 'OVERDUE',
+  DISABLED = 'DISABLED',
+  DELETED = 'DELETED',
+}
+
 export class City {
   id: string;
   name: string;
   latitude: string;
   longitude: string;
-  status: boolean;
+  status: CityStatus;
   createdAt: Date;
   updatedAt: Date;
   featureFlags: {

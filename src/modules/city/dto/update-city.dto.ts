@@ -2,12 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsEnum,
   IsNotEmpty,
   IsString,
   ValidateNested,
 } from 'class-validator';
 
 import { CreateCityDto } from './create-city.dto';
+import { CityStatus } from '../entities/city.entity';
 
 class FeatureFlag {
   @IsString()
@@ -40,9 +42,9 @@ class FeatureFlag {
 }
 
 export class UpdateCityDto extends CreateCityDto {
-  @IsBoolean()
+  @IsEnum(CityStatus)
   @ApiProperty()
-  status: boolean;
+  status: CityStatus;
 
   @ApiProperty({ type: [FeatureFlag] })
   @Type(() => FeatureFlag)

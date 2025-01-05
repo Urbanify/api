@@ -1,4 +1,5 @@
-import { City } from 'src/modules/city/entities/city.entity';
+import { CityStatus as PrimaCityStatus } from '@prisma/client';
+import { City, CityStatus } from 'src/modules/city/entities/city.entity';
 
 export class CityModelToEntityMapper {
   public static map({
@@ -15,7 +16,7 @@ export class CityModelToEntityMapper {
     name: string;
     latitude: string;
     longitude: string;
-    status: boolean;
+    status: PrimaCityStatus;
     createdAt: Date;
     updatedAt: Date;
     cityFeatures: {
@@ -40,7 +41,7 @@ export class CityModelToEntityMapper {
       name,
       latitude,
       longitude,
-      status,
+      status: CityStatus[status],
       createdAt,
       updatedAt,
       featureFlags: cityFeatures.map((cityFeature) => ({

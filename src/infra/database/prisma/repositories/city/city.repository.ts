@@ -51,7 +51,7 @@ export class CityRepository {
         id,
       },
       data: {
-        status: false,
+        status: 'DISABLED',
       },
     });
   }

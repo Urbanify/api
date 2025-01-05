@@ -53,14 +53,23 @@ model FeatureFlag {
   @@map("feature_flags")
 }
 
+enum CityStatus {
+  ACTIVE
+  OVERDUE
+  DISABLED
+  DELETED
+
+  @@map("city_status")
+}
+
 model City {
-  id        String   @id @default(uuid()) @db.Uuid
+  id        String     @id @default(uuid()) @db.Uuid
   name      String
   latitude  String
   longitude String
-  status    Boolean  @default(true)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  status    CityStatus @default(ACTIVE)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
 
   cityFeatures CityFeature[]
 

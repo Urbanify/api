@@ -7,6 +7,7 @@ import { UUIDGenerator } from '@shared/uuid-generator';
 
 import { CreateCityDto } from './dto/create-city.dto';
 import { UpdateCityDto } from './dto/update-city.dto';
+import { CityStatus } from './entities/city.entity';
 
 @Injectable()
 export class CityService {
@@ -28,7 +29,7 @@ export class CityService {
       name: createCityDto.name,
       latitude: createCityDto.latitude,
       longitude: createCityDto.longitude,
-      status: true,
+      status: CityStatus.ACTIVE,
       featureFlags: featureFlags.map((featureFlag) => ({
         cityId: id,
         featureFlagId: featureFlag.id,
