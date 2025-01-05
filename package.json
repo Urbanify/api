@@ -79,6 +79,7 @@
   },
   "jest": {
     "moduleNameMapper": {
+      "@modules/(.*)": "<rootDir>/modules/$1",
       "@infra/(.*)": "<rootDir>/infra/$1",
       "@shared/(.*)": "<rootDir>/shared/$1"
     },
