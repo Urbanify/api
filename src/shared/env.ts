@@ -1,26 +1,33 @@
 import { plainToInstance } from 'class-transformer';
-import { IsNotEmpty, IsString, validateSync } from 'class-validator';
+import { IsString, validateSync } from 'class-validator';
 
 class Env {
   @IsString()
-  @IsNotEmpty()
   port: string;
 
   @IsString()
-  @IsNotEmpty()
   jwtSecret: string;
 
   @IsString()
-  @IsNotEmpty()
   databaseUrl: string;
 
   @IsString()
-  @IsNotEmpty()
   apiKey: string;
 
   @IsString()
-  @IsNotEmpty()
   directUrl: string;
+
+  @IsString()
+  mailgunKey: string;
+
+  @IsString()
+  mailgunUrl: string;
+
+  @IsString()
+  mailServiceFrom: string;
+
+  @IsString()
+  frontendUrl: string;
 }
 
 export const env: Env = plainToInstance(Env, {
@@ -29,6 +36,10 @@ export const env: Env = plainToInstance(Env, {
   databaseUrl: process.env.DATABASE_URL,
   apiKey: process.env.API_KEY,
   directUrl: process.env.DIRECT_URL,
+  mailgunKey: process.env.MAILGUN_KEY,
+  mailgunUrl: process.env.MAILGUN_URL,
+  mailServiceFrom: process.env.MAIL_SERVICE_FROM,
+  frontendUrl: process.env.FRONTEND_URL,
 });
 
 const errors = validateSync(env);

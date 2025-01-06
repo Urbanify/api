@@ -11,12 +11,20 @@ import { compare, hash } from 'bcrypt';
 
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
+import { MailService } from '@infra/mail/mail.service';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { TokenAction } from '@infra/mail/mail.dto';
+import { env } from '@shared/env';
+import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
+import { UserType } from '@shared/decorators/active-user.decorator';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   public async signup(signupDto: SignupDto) {
@@ -82,5 +90,58 @@ export class AuthService {
     return {
       token,
     };
+  }
+
+  public async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const cpf = resetPasswordDto.cpf;
+
+    const user = await this.userRepository.findByCpf(cpf);
+
+    if (!user) {
+      throw new NotFoundException(`user with cpf ${cpf} not found`);
+    }
+
+    const payload = {
+      user: {
+        id: user.id,
+        role: user.role,
+        cityId: user.cityId,
+      },
+      action: TokenAction.RESET_PASSWORD,
+    };
+
+    const token = await this.jwtService.signAsync(payload);
+
+    const frontendResetPasswordUrl = `${env.frontendUrl}?token=${token}`;
+
+    await this.mailService.send({
+      to: user.email,
+      subject: 'email de teste',
+      template: 'reset-password',
+      payload: {
+        link: frontendResetPasswordUrl,
+      },
+    });
+
+    return {
+      sentTo: user.email,
+    };
+  }
+
+  public async confirmResetPassword(
+    userType: UserType,
+    confirmResetPasswordDto: ConfirmResetPasswordDto,
+  ) {
+    const user = await this.userRepository.findById(userType.id);
+
+    const newPasswordHashed = await hash(
+      confirmResetPasswordDto.newPassword,
+      10,
+    );
+
+    await this.userRepository.update({
+      ...user,
+      password: newPasswordHashed,
+    });
   }
 }

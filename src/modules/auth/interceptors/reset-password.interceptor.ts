@@ -1,4 +1,6 @@
+import { TokenAction } from '@infra/mail/mail.dto';
 import {
+  BadRequestException,
   CallHandler,
   ExecutionContext,
   Injectable,
@@ -7,12 +9,11 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { env } from '@shared/env';
-import { extractTokenFromHeader } from '@shared/extract-token';
+import { Request } from 'express';
 import { Observable } from 'rxjs';
-import { UserRole } from 'src/modules/auth/entities/user.entity';
 
 @Injectable()
-export class AdminValidationInterceptor implements NestInterceptor {
+export class ResetPasswordValidationInterceptor implements NestInterceptor {
   constructor(private readonly jwtService: JwtService) {}
 
   async intercept(
@@ -21,7 +22,7 @@ export class AdminValidationInterceptor implements NestInterceptor {
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
 
-    const token = extractTokenFromHeader(request);
+    const { token, newPassword, newPasswordConfirmation } = request?.body;
 
     if (!token) {
       throw new UnauthorizedException();
@@ -34,10 +35,14 @@ export class AdminValidationInterceptor implements NestInterceptor {
 
       const user = payload.user;
 
-      const role = user.role;
+      const action = payload.action;
 
-      if (role !== UserRole.ADMIN) {
+      if (action !== TokenAction.RESET_PASSWORD) {
         throw new UnauthorizedException();
+      }
+
+      if (newPassword !== newPasswordConfirmation) {
+        throw new BadRequestException('passwords do not match');
       }
 
       request['user'] = user;
@@ -46,5 +51,10 @@ export class AdminValidationInterceptor implements NestInterceptor {
     }
 
     return next.handle();
+  }
+
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type == 'Bearer' ? token : undefined;
   }
 }

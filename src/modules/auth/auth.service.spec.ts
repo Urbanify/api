@@ -11,11 +11,16 @@ import { AuthService } from './auth.service';
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
 import { User, UserRole } from './entities/user.entity';
+import { MailService } from '@infra/mail/mail.service';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
+import { UserType } from '@shared/decorators/active-user.decorator';
 
 describe('AuthService', () => {
   let service: AuthService;
   let userRepository: UserRepository;
   let jwtService: JwtService;
+  let mailService: MailService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -27,6 +32,8 @@ describe('AuthService', () => {
             create: jest.fn().mockResolvedValue(null),
             findByCpf: jest.fn().mockResolvedValue(null),
             findByEmail: jest.fn().mockResolvedValue(null),
+            findById: jest.fn().mockResolvedValue(null),
+            update: jest.fn().mockResolvedValue(null),
           },
         },
         {
@@ -35,12 +42,19 @@ describe('AuthService', () => {
             signAsync: jest.fn().mockResolvedValue('token'),
           },
         },
+        {
+          provide: MailService,
+          useValue: {
+            send: jest.fn().mockResolvedValue(null),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
     userRepository = module.get<UserRepository>(UserRepository);
     jwtService = module.get<JwtService>(JwtService);
+    mailService = module.get<MailService>(MailService);
   });
 
   it('should be defined', () => {
@@ -190,6 +204,90 @@ describe('AuthService', () => {
       );
 
       expect(service.signin(signinInput)).rejects.toEqual(badRequestException);
+    });
+  });
+
+  describe('reset-password', () => {
+    it('should sent a email to reset password for user', async () => {
+      const user: User = {
+        id: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
+        name: 'John',
+        surname: 'Doe',
+        email: 'john@doe.com',
+        password:
+          '$2b$10$C3B2DiJugzy1JlkRW2a.YuehWjYMpB307Qg860GgNG0N4Fhfsfhei',
+        cpf: '12345678910',
+        cityId: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
+        role: UserRole.ADMIN,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      jest.spyOn(userRepository, 'findByCpf').mockResolvedValueOnce(user);
+
+      const resetPasswordInput: ResetPasswordDto = {
+        cpf: user.cpf,
+      };
+
+      const result = await service.resetPassword(resetPasswordInput);
+
+      expect(userRepository.findByCpf).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        sentTo: user.email,
+      });
+    });
+
+    it('should throw a not found exception because user not found', async () => {
+      const cpf = '12345678910';
+
+      const resetPasswordInput: ResetPasswordDto = {
+        cpf,
+      };
+
+      const notFoundException = new NotFoundException(
+        `user with cpf ${cpf} not found`,
+      );
+
+      expect(service.resetPassword(resetPasswordInput)).rejects.toEqual(
+        notFoundException,
+      );
+    });
+  });
+
+  describe('confirm reset-password', () => {
+    it('sould confirm and reset the user password', async () => {
+      const user: User = {
+        id: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
+        name: 'John',
+        surname: 'Doe',
+        email: 'john@doe.com',
+        password:
+          '$2b$10$C3B2DiJugzy1JlkRW2a.YuehWjYMpB307Qg860GgNG0N4Fhfsfhei',
+        cpf: '12345678910',
+        cityId: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
+        role: UserRole.ADMIN,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      jest.spyOn(userRepository, 'findById').mockResolvedValueOnce(user);
+
+      const confirmResetPasswordInput: ConfirmResetPasswordDto = {
+        token: 'token',
+        newPassword: '123456789',
+        newPasswordConfirmation: '123456789',
+      };
+
+      const userType: UserType = {
+        id: user.id,
+        role: user.role,
+        cityId: user.cityId,
+      };
+
+      await service.confirmResetPassword(userType, confirmResetPasswordInput);
+
+      expect(userRepository.findById).toHaveBeenCalledTimes(1);
+      expect(userRepository.update).toHaveBeenCalledTimes(1);
     });
   });
 });

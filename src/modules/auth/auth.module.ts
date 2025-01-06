@@ -4,6 +4,7 @@ import { env } from '@shared/env';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { MailModule } from '@infra/mail/mail.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { AuthService } from './auth.service';
       secret: env.jwtSecret,
       signOptions: { expiresIn: '8h' },
     }),
+    MailModule,
   ],
   controllers: [AuthController],
   providers: [AuthService],
