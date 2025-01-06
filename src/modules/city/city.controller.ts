@@ -44,7 +44,6 @@ export class CityController {
   }
 
   @Get()
-  @UseInterceptors(AuthValidationInterceptor)
   @ApiOperation({ summary: 'List available cities' })
   @ApiResponse({ type: [ListCitiesResponseDto] })
   list() {
