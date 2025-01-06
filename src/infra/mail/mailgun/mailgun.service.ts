@@ -4,7 +4,6 @@ import Mailgun from 'mailgun.js';
 import { IMailgunClient } from 'mailgun.js/Interfaces';
 
 import { SendMailDto } from '../mail.dto';
-import { templates } from '../templates';
 
 @Injectable()
 export class MailgunService {
@@ -21,15 +20,12 @@ export class MailgunService {
 
   public async send(input: SendMailDto): Promise<void> {
     try {
-      const templateBuild = templates[input.template];
-
-      const template = templateBuild(input.payload);
-
       await this.client.messages.create(env.mailgunUrl, {
         from: env.mailServiceFrom,
         to: input.to,
         subject: input.subject,
-        html: template,
+        template: input.template,
+        'h:X-Mailgun-Variables': JSON.stringify(input.payload),
       });
     } catch (error) {
       console.log('🚀 ~ failed to send email - error:', error);
