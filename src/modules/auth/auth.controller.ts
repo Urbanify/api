@@ -7,18 +7,18 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ActiveUser, UserType } from '@shared/decorators/active-user.decorator';
 
 import { AuthService } from './auth.service';
-import { SigninDto } from './dto/signin.dto';
-import { SignupDto } from './dto/signup.dto';
-import { SignupValidationInterceptor } from './interceptors/signup.interceptor';
+import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
 import {
   ResetPasswordDto,
   ResetPasswordResponseDto,
 } from './dto/reset-password.dto';
-import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
+import { SigninDto } from './dto/signin.dto';
+import { SignupDto } from './dto/signup.dto';
 import { ResetPasswordValidationInterceptor } from './interceptors/reset-password.interceptor';
-import { ActiveUser, UserType } from '@shared/decorators/active-user.decorator';
+import { SignupValidationInterceptor } from './interceptors/signup.interceptor';
 
 @Controller('auth')
 export class AuthController {

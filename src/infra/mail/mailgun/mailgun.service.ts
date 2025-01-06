@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { env } from '@shared/env';
 import Mailgun from 'mailgun.js';
 import { IMailgunClient } from 'mailgun.js/Interfaces';
+
 import { SendMailDto } from '../mail.dto';
 import { templates } from '../templates';
 

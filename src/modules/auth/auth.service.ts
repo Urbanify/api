@@ -1,4 +1,6 @@
 import { UserRepository } from '@infra/database/prisma/repositories/user/user.repository';
+import { TokenAction } from '@infra/mail/mail.dto';
+import { MailService } from '@infra/mail/mail.service';
 import {
   BadRequestException,
   ConflictException,
@@ -6,18 +8,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { UserType } from '@shared/decorators/active-user.decorator';
+import { env } from '@shared/env';
 import { UUIDGenerator } from '@shared/uuid-generator';
 import { compare, hash } from 'bcrypt';
 
+import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
-import { MailService } from '@infra/mail/mail.service';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { TokenAction } from '@infra/mail/mail.dto';
-import { env } from '@shared/env';
-import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
-import { UserType } from '@shared/decorators/active-user.decorator';
-import { User } from './entities/user.entity';
 
 @Injectable()
 export class AuthService {

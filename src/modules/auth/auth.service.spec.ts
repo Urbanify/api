@@ -1,4 +1,5 @@
 import { UserRepository } from '@infra/database/prisma/repositories/user/user.repository';
+import { MailService } from '@infra/mail/mail.service';
 import {
   BadRequestException,
   ConflictException,
@@ -6,15 +7,14 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import { UserType } from '@shared/decorators/active-user.decorator';
 
 import { AuthService } from './auth.service';
+import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
 import { User, UserRole } from './entities/user.entity';
-import { MailService } from '@infra/mail/mail.service';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
-import { UserType } from '@shared/decorators/active-user.decorator';
 
 describe('AuthService', () => {
   let service: AuthService;
