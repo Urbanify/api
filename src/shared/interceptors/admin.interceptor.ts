@@ -8,11 +8,11 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { UserRole } from '@prisma/client';
 import { env } from '@shared/env';
-import { Request } from 'express';
+import { extractTokenFromHeader } from '@shared/extract-token';
 import { Observable } from 'rxjs';
 
 @Injectable()
-export class FeatureFlagValidationInterceptor implements NestInterceptor {
+export class AdminValidationInterceptor implements NestInterceptor {
   constructor(private readonly jwtService: JwtService) {}
 
   async intercept(
@@ -21,7 +21,7 @@ export class FeatureFlagValidationInterceptor implements NestInterceptor {
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
 
-    const token = this.extractTokenFromHeader(request);
+    const token = extractTokenFromHeader(request);
 
     if (!token) {
       throw new UnauthorizedException();
@@ -46,10 +46,5 @@ export class FeatureFlagValidationInterceptor implements NestInterceptor {
     }
 
     return next.handle();
-  }
-
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type == 'Bearer' ? token : undefined;
   }
 }

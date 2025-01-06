@@ -79,6 +79,7 @@
   },
   "jest": {
     "moduleNameMapper": {
+      "@modules/(.*)": "<rootDir>/modules/$1",
       "@infra/(.*)": "<rootDir>/infra/$1",
       "@shared/(.*)": "<rootDir>/shared/$1"
     },
@@ -101,7 +102,7 @@
       "!**/*.interceptor.(t|j)s",
       "!**/*.entity.(t|j)s",
       "!**/*.decorator.(t|j)s",
-      "!./shared/env.(t|j)s",
+      "!./shared/**.(t|j)s",
       "!./app.service.ts",
       "!./main.ts"
     ],

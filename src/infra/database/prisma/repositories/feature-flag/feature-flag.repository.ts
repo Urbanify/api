@@ -1,19 +1,33 @@
 import { Injectable } from '@nestjs/common';
-import { FeatureFlag } from 'src/modules/feature-flag/entities/feature-flag.entity';
 
 import { FeatureFlagEntityToModelMapper } from './mappers/feature-flag-entity-to-model.mapper';
 import { FeatureFlagModelToEntityMapper } from './mappers/feature-flag-model-to-entity.mapper';
 import { PrismaService } from '../../prisma.service';
+import { FeatureFlag } from '@modules/feature-flag/entities/feature-flag.entity';
 
 @Injectable()
 export class FeatureFlagRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   public async create(featureFlag: FeatureFlag): Promise<void> {
+    const cities = await this.prismaService.city.findMany();
+
+    const cityFeatures = cities.map((city) => ({
+      cityId: city.id,
+      status: false,
+    }));
+
     const data = FeatureFlagEntityToModelMapper.map(featureFlag);
 
     await this.prismaService.featureFlag.create({
-      data,
+      data: {
+        ...data,
+        cityFeatures: {
+          createMany: {
+            data: cityFeatures,
+          },
+        },
+      },
     });
   }
 
@@ -29,6 +43,16 @@ export class FeatureFlagRepository {
     }
 
     return FeatureFlagModelToEntityMapper.map(featureFlagModel);
+  }
+
+  public async list(): Promise<FeatureFlag[]> {
+    const featureFlagModels = await this.prismaService.featureFlag.findMany();
+
+    const entities = featureFlagModels.map((featureFlagModel) =>
+      FeatureFlagModelToEntityMapper.map(featureFlagModel),
+    );
+
+    return entities;
   }
 
   public async update(featureFlag: FeatureFlag): Promise<void> {
