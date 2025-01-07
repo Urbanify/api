@@ -12,7 +12,23 @@ export class UserRepository {
   public async create(user: User): Promise<void> {
     const data = UserEntityToModelMapper.map(user);
 
-    await this.prismaService.user.create(data);
+    await this.prismaService.user.create({
+      data,
+    });
+  }
+
+  public async findById(id: string): Promise<User | null> {
+    const userModel = await this.prismaService.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!userModel) {
+      return null;
+    }
+
+    return UserModelToEntityMapper.map(userModel);
   }
 
   public async findByCpf(cpf: string): Promise<User | null> {
@@ -41,5 +57,16 @@ export class UserRepository {
     }
 
     return UserModelToEntityMapper.map(userModel);
+  }
+
+  public async update(user: User): Promise<void> {
+    const data = UserEntityToModelMapper.map(user);
+
+    await this.prismaService.user.update({
+      where: {
+        id: data.id,
+      },
+      data,
+    });
   }
 }
