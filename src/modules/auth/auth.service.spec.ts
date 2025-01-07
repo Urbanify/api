@@ -10,10 +10,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserType } from '@shared/decorators/active-user.decorator';
 
 import { AuthService } from './auth.service';
-import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User, UserRole } from './entities/user.entity';
 
 describe('AuthService', () => {
@@ -207,8 +207,8 @@ describe('AuthService', () => {
     });
   });
 
-  describe('reset-password', () => {
-    it('should sent a email to reset password for user', async () => {
+  describe('forgot-password', () => {
+    it('should send a reset password email to the user', async () => {
       const user: User = {
         id: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
         name: 'John',
@@ -225,13 +225,14 @@ describe('AuthService', () => {
 
       jest.spyOn(userRepository, 'findByCpf').mockResolvedValueOnce(user);
 
-      const resetPasswordInput: ResetPasswordDto = {
+      const forgotPasswordInput: ForgotPasswordDto = {
         cpf: user.cpf,
       };
 
-      const result = await service.resetPassword(resetPasswordInput);
+      const result = await service.forgotPassword(forgotPasswordInput);
 
       expect(userRepository.findByCpf).toHaveBeenCalledTimes(1);
+      expect(mailService.send).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         sentTo: user.email,
       });
@@ -240,7 +241,7 @@ describe('AuthService', () => {
     it('should throw a not found exception because user not found', async () => {
       const cpf = '12345678910';
 
-      const resetPasswordInput: ResetPasswordDto = {
+      const forgotPasswordInput: ForgotPasswordDto = {
         cpf,
       };
 
@@ -248,14 +249,14 @@ describe('AuthService', () => {
         `user with cpf ${cpf} not found`,
       );
 
-      expect(service.resetPassword(resetPasswordInput)).rejects.toEqual(
+      expect(service.forgotPassword(forgotPasswordInput)).rejects.toEqual(
         notFoundException,
       );
     });
   });
 
-  describe('confirm reset-password', () => {
-    it('sould confirm and reset the user password', async () => {
+  describe('update password', () => {
+    it('sould update the user password', async () => {
       const user: User = {
         id: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
         name: 'John',
@@ -272,7 +273,7 @@ describe('AuthService', () => {
 
       jest.spyOn(userRepository, 'findById').mockResolvedValueOnce(user);
 
-      const confirmResetPasswordInput: ConfirmResetPasswordDto = {
+      const updatePasswordInput: UpdatePasswordDto = {
         token: 'token',
         newPassword: '123456789',
         newPasswordConfirmation: '123456789',
@@ -284,7 +285,7 @@ describe('AuthService', () => {
         cityId: user.cityId,
       };
 
-      await service.confirmResetPassword(userType, confirmResetPasswordInput);
+      await service.updatePassword(userType, updatePasswordInput);
 
       expect(userRepository.findById).toHaveBeenCalledTimes(1);
       expect(userRepository.update).toHaveBeenCalledTimes(1);

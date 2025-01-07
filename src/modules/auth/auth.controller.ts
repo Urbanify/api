@@ -10,14 +10,14 @@ import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ActiveUser, UserType } from '@shared/decorators/active-user.decorator';
 
 import { AuthService } from './auth.service';
-import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
 import {
-  ResetPasswordDto,
-  ResetPasswordResponseDto,
-} from './dto/reset-password.dto';
+  ForgotPasswordDto,
+  ForgotPasswordResponseDto,
+} from './dto/forgot-password.dto';
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
-import { ResetPasswordValidationInterceptor } from './interceptors/reset-password.interceptor';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { ForgotPasswordValidationInterceptor } from './interceptors/forgot-password.interceptor';
 import { SignupValidationInterceptor } from './interceptors/signup.interceptor';
 
 @Controller('auth')
@@ -37,21 +37,21 @@ export class AuthController {
     return this.authService.signin(signinDto);
   }
 
-  @Post('/reset-password')
+  @Post('/forgot-password')
   @ApiOperation({ summary: 'Reset an user password' })
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ type: ResetPasswordResponseDto })
-  resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    return this.authService.resetPassword(resetPasswordDto);
+  @ApiResponse({ type: ForgotPasswordResponseDto })
+  forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto);
   }
 
-  @Post('/reset-password/confirm')
-  @ApiOperation({ summary: 'Confirm the user reset password' })
-  @UseInterceptors(ResetPasswordValidationInterceptor)
-  confirmResetPassword(
-    @Body() confirmResetPasswordDto: ConfirmResetPasswordDto,
+  @Post('/update-password')
+  @ApiOperation({ summary: 'Update the user password' })
+  @UseInterceptors(ForgotPasswordValidationInterceptor)
+  updatePassword(
+    @Body() updatePassword: UpdatePasswordDto,
     @ActiveUser() user: UserType,
   ) {
-    return this.authService.confirmResetPassword(user, confirmResetPasswordDto);
+    return this.authService.updatePassword(user, updatePassword);
   }
 }

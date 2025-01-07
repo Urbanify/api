@@ -1,6 +1,6 @@
 import { IsJWT, IsString } from 'class-validator';
 
-export class ConfirmResetPasswordDto {
+export class UpdatePasswordDto {
   @IsJWT()
   token: string;
 

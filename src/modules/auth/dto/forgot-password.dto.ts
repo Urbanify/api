@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
-export class ResetPasswordDto {
+export class ForgotPasswordDto {
   @IsString()
   @ApiProperty()
   cpf: string;
 }
 
-export class ResetPasswordResponseDto {
+export class ForgotPasswordResponseDto {
   @IsString()
   @ApiProperty()
   sentTo: string;

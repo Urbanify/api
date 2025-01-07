@@ -1,5 +1,5 @@
 import { UserRepository } from '@infra/database/prisma/repositories/user/user.repository';
-import { TokenAction } from '@infra/mail/mail.dto';
+import { Templates, TokenAction } from '@infra/mail/mail.dto';
 import { MailService } from '@infra/mail/mail.service';
 import {
   BadRequestException,
@@ -13,10 +13,10 @@ import { env } from '@shared/env';
 import { UUIDGenerator } from '@shared/uuid-generator';
 import { compare, hash } from 'bcrypt';
 
-import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { SigninDto } from './dto/signin.dto';
 import { SignupDto } from './dto/signup.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -91,8 +91,8 @@ export class AuthService {
     };
   }
 
-  public async resetPassword(resetPasswordDto: ResetPasswordDto) {
-    const cpf = resetPasswordDto.cpf;
+  public async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    const cpf = forgotPasswordDto.cpf;
 
     const user = await this.userRepository.findByCpf(cpf);
 
@@ -106,19 +106,19 @@ export class AuthService {
         role: user.role,
         cityId: user.cityId,
       },
-      action: TokenAction.RESET_PASSWORD,
+      action: TokenAction.FORGOT_PASSWORD,
     };
 
     const token = await this.jwtService.signAsync(payload);
 
-    const frontendResetPasswordUrl = `${env.frontendUrl}?token=${token}`;
+    const frontendForgotPasswordUrl = `${env.frontendUrl}?token=${token}`;
 
     await this.mailService.send({
       to: user.email,
       subject: 'email de teste',
-      template: 'reset-password',
+      template: Templates.FORGOT_PASSWORD,
       payload: {
-        link: frontendResetPasswordUrl,
+        link: frontendForgotPasswordUrl,
       },
     });
 
@@ -127,16 +127,13 @@ export class AuthService {
     };
   }
 
-  public async confirmResetPassword(
+  public async updatePassword(
     userType: UserType,
-    confirmResetPasswordDto: ConfirmResetPasswordDto,
+    updatePasswordDto: UpdatePasswordDto,
   ) {
     const user = await this.userRepository.findById(userType.id);
 
-    const newPasswordHashed = await hash(
-      confirmResetPasswordDto.newPassword,
-      10,
-    );
+    const newPasswordHashed = await hash(updatePasswordDto.newPassword, 10);
 
     await this.userRepository.update({
       ...user,

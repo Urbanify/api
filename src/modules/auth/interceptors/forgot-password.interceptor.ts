@@ -9,11 +9,10 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { env } from '@shared/env';
-import { Request } from 'express';
 import { Observable } from 'rxjs';
 
 @Injectable()
-export class ResetPasswordValidationInterceptor implements NestInterceptor {
+export class ForgotPasswordValidationInterceptor implements NestInterceptor {
   constructor(private readonly jwtService: JwtService) {}
 
   async intercept(
@@ -37,7 +36,7 @@ export class ResetPasswordValidationInterceptor implements NestInterceptor {
 
       const action = payload.action;
 
-      if (action !== TokenAction.RESET_PASSWORD) {
+      if (action !== TokenAction.FORGOT_PASSWORD) {
         throw new UnauthorizedException();
       }
 
@@ -51,10 +50,5 @@ export class ResetPasswordValidationInterceptor implements NestInterceptor {
     }
 
     return next.handle();
-  }
-
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type == 'Bearer' ? token : undefined;
   }
 }

@@ -1,5 +1,9 @@
+export enum Templates {
+  FORGOT_PASSWORD = 'forgot-password',
+}
+
 export enum TokenAction {
-  RESET_PASSWORD = 'RESET_PASSWORD',
+  FORGOT_PASSWORD = 'FORGOT_PASSWORD',
 }
 
 export type SendMailDto = {
