@@ -36,6 +36,11 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  issuesReported Issue[]        @relation("reporter")
+  issuesFiscal   Issue[]        @relation("fiscal")
+  issuesManaged  Issue[]        @relation("manager")
+  issueHistory   IssueHistory[]
+
   @@map("users")
 }
 
@@ -89,4 +94,73 @@ model CityFeature {
 
   @@unique([cityId, featureFlagId])
   @@map("city_features")
+}
+
+enum IssueStatus {
+  WAITING_FOR_FISCAL
+  WAITING_FOR_PROCEDURE
+  WAITING_FOR_MANAGER
+  WAITING_FOR_MANAGER_RESOLUTION
+  WAITING_FOR_RESOLUTION_VALIDATION
+  SOLVED
+  CLOSED
+
+  @@map("issue_status")
+}
+
+enum IssueCategory {
+  URBAN
+
+  @@map("issue_category")
+}
+
+model Issue {
+  id          String        @id @default(uuid()) @db.Uuid
+  status      IssueStatus   @default(WAITING_FOR_FISCAL)
+  cityId      String
+  latitude    String
+  longitude   String
+  category    IssueCategory
+  description String
+  reporterId  String?       @db.Uuid
+  fiscalId    String?       @db.Uuid
+  managerId   String?       @db.Uuid
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  reporter User?          @relation("reporter", fields: [reporterId], references: [id], onDelete: SetNull)
+  fiscal   User?          @relation("fiscal", fields: [fiscalId], references: [id], onDelete: SetNull)
+  manager  User?          @relation("manager", fields: [managerId], references: [id], onDelete: SetNull)
+  history  IssueHistory[]
+  photos   IssuePhoto[]
+
+  @@index([cityId])
+  @@map("issues")
+}
+
+model IssueHistory {
+  id          String   @id @default(uuid()) @db.Uuid
+  issueId     String   @db.Uuid
+  userId      String?  @db.Uuid
+  action      String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("issue_history")
+}
+
+model IssuePhoto {
+  id        String   @id @default(uuid()) @db.Uuid
+  issueId   String   @db.Uuid
+  url       String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@map("issue_photos")
 }

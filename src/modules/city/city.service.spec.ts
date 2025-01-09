@@ -270,6 +270,8 @@ describe('CityService', () => {
     it('should generate a token for user from city id', async () => {
       const user: UserType = {
         id: '8cb4c3b7-0933-4c70-b307-0ced2dc3f4f9',
+        name: 'John',
+        surname: 'Doe',
         role: UserRole.ADMIN,
         cityId: '2041dbfb-f0ee-43d2-9566-c041a1949207',
       };

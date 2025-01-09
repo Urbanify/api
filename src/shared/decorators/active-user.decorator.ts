@@ -7,6 +7,8 @@ import { UserRole } from 'src/modules/auth/entities/user.entity';
 
 export type UserType = {
   id: string;
+  name: string;
+  surname: string;
   role: UserRole;
   cityId: string;
 };
