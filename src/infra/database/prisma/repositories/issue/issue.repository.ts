@@ -244,43 +244,4 @@ export class IssueRepository {
 
     await Promise.all([...historyToCreatePromises, issueUpdatedPromise]);
   }
-
-  // public async findByCpf(cpf: string): Promise<User | null> {
-  //   const userModel = await this.prismaService.user.findUnique({
-  //     where: {
-  //       cpf,
-  //     },
-  //   });
-
-  //   if (!userModel) {
-  //     return null;
-  //   }
-
-  //   return UserModelToEntityMapper.map(userModel);
-  // }
-
-  // public async findByEmail(email: string): Promise<User | null> {
-  //   const userModel = await this.prismaService.user.findUnique({
-  //     where: {
-  //       email,
-  //     },
-  //   });
-
-  //   if (!userModel) {
-  //     return null;
-  //   }
-
-  //   return UserModelToEntityMapper.map(userModel);
-  // }
-
-  // public async update(user: User): Promise<void> {
-  //   const data = UserEntityToModelMapper.map(user);
-
-  //   await this.prismaService.user.update({
-  //     where: {
-  //       id: data.id,
-  //     },
-  //     data,
-  //   });
-  // }
 }
