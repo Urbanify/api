@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -9,9 +10,10 @@ import {
   Post,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { CreateFeatureFlagDto } from './dto/create-feature-flag.dto';
+import { ListFeatureFlagsResponseDto } from './dto/list-feature-flags.dto';
 import { UpdateFeatureFlagDto } from './dto/update-feature-flag.dto';
 import { FeatureFlagService } from './feature-flag.service';
 import { AdminValidationInterceptor } from '../../shared/interceptors/admin.interceptor';
@@ -25,6 +27,13 @@ export class FeatureFlagController {
   @ApiOperation({ summary: 'Create a feature flag' })
   create(@Body() createFeatureFlagDto: CreateFeatureFlagDto) {
     return this.featureFlagService.create(createFeatureFlagDto);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'List feature flags' })
+  @ApiResponse({ type: [ListFeatureFlagsResponseDto] })
+  list() {
+    return this.featureFlagService.list();
   }
 
   @Patch(':id')

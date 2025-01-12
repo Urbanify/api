@@ -22,6 +22,7 @@ describe('FeatureFlagService', () => {
             findById: jest.fn().mockResolvedValue(null),
             update: jest.fn().mockResolvedValue(null),
             delete: jest.fn().mockResolvedValue(null),
+            list: jest.fn().mockResolvedValue(null),
           },
         },
       ],
@@ -119,6 +120,27 @@ describe('FeatureFlagService', () => {
       );
 
       expect(service.delete(id)).rejects.toEqual(notFoundException);
+    });
+  });
+
+  describe('list', () => {
+    it('should list feature flags', async () => {
+      const featureFlag: FeatureFlag = {
+        id: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
+        slug: 'ff',
+        description: 'description',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      jest
+        .spyOn(featureFlagRepository, 'list')
+        .mockResolvedValueOnce([featureFlag]);
+
+      const response = await service.list();
+
+      expect(response).toBeDefined();
+      expect(response).toEqual([featureFlag]);
     });
   });
 });

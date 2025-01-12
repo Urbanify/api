@@ -21,6 +21,10 @@ export class FeatureFlagService {
     });
   }
 
+  public async list() {
+    return this.featureFlagRepository.list();
+  }
+
   public async update(id: string, updateFeatureFlagDto: UpdateFeatureFlagDto) {
     const featureFlag = await this.featureFlagRepository.findById(id);
 

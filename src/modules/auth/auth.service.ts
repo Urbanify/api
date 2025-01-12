@@ -111,7 +111,9 @@ export class AuthService {
       action: TokenAction.FORGOT_PASSWORD,
     };
 
-    const token = await this.jwtService.signAsync(payload);
+    const token = await this.jwtService.signAsync(payload, {
+      expiresIn: '24h',
+    });
 
     const frontendForgotPasswordUrl = `${env.frontendUrl}?token=${token}`;
 
