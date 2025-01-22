@@ -15,7 +15,7 @@ import { ListIssuesFilterDto } from './dto/list-issues.dto';
 import { ListIssuesReportedByUserFilterDto } from './dto/list-issues-reported-by-user.dto';
 import { ResolutionIssueDto } from './dto/resolution-issue.dto';
 import { SolveIssueDto } from './dto/solve-issue.dto';
-import { IssueStatus } from './entities/issue.entity';
+import { IssueHistoryAction, IssueStatus } from './entities/issue.entity';
 
 @Injectable()
 export class IssueService {
@@ -29,6 +29,7 @@ export class IssueService {
       latitude: createIssueDto.latitude,
       longitude: createIssueDto.longitude,
       category: createIssueDto.category,
+      type: createIssueDto.type,
       description: createIssueDto.description,
       reporterId: userType.id,
       createdAt: new Date(),
@@ -37,7 +38,8 @@ export class IssueService {
         {
           id: UUIDGenerator.generate(),
           userId: userType.id,
-          action: `${userType.name} ${userType.surname} reportou um problema`,
+          userName: `${userType.name} ${userType.surname}`,
+          action: IssueHistoryAction.REPORTED_ISSUE,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -117,7 +119,8 @@ export class IssueService {
       issue.history.push({
         id: UUIDGenerator.generate(),
         userId: userId,
-        action: `${userType.name} ${userType.surname} se atribuiu como fiscal`,
+        userName: `${userType.name} ${userType.surname}`,
+        action: IssueHistoryAction.ASSIGNED_AS_FISCAL,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -139,7 +142,8 @@ export class IssueService {
       issue.history.push({
         id: UUIDGenerator.generate(),
         userId: userId,
-        action: `${userType.name} ${userType.surname} se atribuiu como Gestor responsável`,
+        userName: `${userType.name} ${userType.surname}`,
+        action: IssueHistoryAction.ASSIGNED_AS_MANAGER,
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -189,7 +193,8 @@ export class IssueService {
     issue.history.push({
       id: UUIDGenerator.generate(),
       userId: userType.id,
-      action: `${userType.name} ${userType.surname} marcou o problema como improcedente`,
+      userName: `${userType.name} ${userType.surname}`,
+      action: IssueHistoryAction.MARKED_AS_UNFOUNDED,
       description: closeIssueDto.description,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -228,7 +233,8 @@ export class IssueService {
     issue.history.push({
       id: UUIDGenerator.generate(),
       userId: userType.id,
-      action: `${userType.name} ${userType.surname} marcou o problema como procedente`,
+      userName: `${userType.name} ${userType.surname}`,
+      action: IssueHistoryAction.MARKED_AS_VALID,
       description: acceptIssueDto.description,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -267,7 +273,8 @@ export class IssueService {
     issue.history.push({
       id: UUIDGenerator.generate(),
       userId: userType.id,
-      action: `${userType.name} ${userType.surname} adicionou uma resolução`,
+      userName: `${userType.name} ${userType.surname}`,
+      action: IssueHistoryAction.ADDED_RESOLUTION,
       description: resolutionIssueDto.description,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -317,7 +324,8 @@ export class IssueService {
     issue.history.push({
       id: UUIDGenerator.generate(),
       userId: userType.id,
-      action: `${userType.name} ${userType.surname} marcou o problema como resolvido`,
+      userName: `${userType.name} ${userType.surname}`,
+      action: IssueHistoryAction.MARKED_AS_SOLVED,
       description: solveIssueDto.description,
       createdAt: new Date(),
       updatedAt: new Date(),

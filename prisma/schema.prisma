@@ -109,9 +109,55 @@ enum IssueStatus {
 }
 
 enum IssueCategory {
-  URBAN
+  INFRASTRUCTURE
+  ENVIRONMENT
+  TRANSPORTATION
+  SAFETY
+  COMUNITY
 
   @@map("issue_category")
+}
+
+enum IssueType {
+  // INFRASTRUCTURE
+  ROAD_POTHOLE
+  DAMAGED_SIGNAGE
+  DAMAGED_SIDEWALK
+  STREETLIGHT_OUT
+
+  // ENVIRONMENT
+  FALLEN_WIRES
+  WALL_RISK_OF_COLLAPSE
+  EROSION
+  ABANDONED_CONSTRUCTION
+  FALLEN_TREE
+  TREE_COLLAPSE_RISK
+  ILLEGAL_DEFORESTATION
+  GARBAGE_ACCUMULATION
+  ILLEGAL_WASTE_DISPOSAL
+  SEWAGE_LEAK
+  LACK_OF_SANITATION
+  DEAD_ANIMALS
+  FLOODING
+
+  // TRANSPORTATION
+  DAMAGED_BUS_STOP
+  OBSTRUCTED_BIKE_LANE
+  ILLEGAL_PARKING
+  ABANDONED_VEHICLE
+  FADED_PEDESTRIAN_CROSSWALK
+
+  // SAFETY
+  DARK_AREA
+  VANDALISM
+  GRAFFITI
+  STRUCTURAL_RISK
+
+  // COMUNITY
+  ILLEGAL_OCCUPATION
+  ILLEGAL_CONSTRUCTION
+
+  @@map("issue_type")
 }
 
 model Issue {
@@ -121,6 +167,7 @@ model Issue {
   latitude    String
   longitude   String
   category    IssueCategory
+  type        IssueType
   description String
   reporterId  String?       @db.Uuid
   fiscalId    String?       @db.Uuid
@@ -138,14 +185,25 @@ model Issue {
   @@map("issues")
 }
 
+enum IssueHistoryAction {
+  REPORTED_ISSUE
+  ASSIGNED_AS_FISCAL
+  ASSIGNED_AS_MANAGER
+  MARKED_AS_UNFOUNDED
+  MARKED_AS_VALID
+  ADDED_RESOLUTION
+  MARKED_AS_SOLVED
+}
+
 model IssueHistory {
-  id          String   @id @default(uuid()) @db.Uuid
-  issueId     String   @db.Uuid
-  userId      String?  @db.Uuid
-  action      String
+  id          String             @id @default(uuid()) @db.Uuid
+  issueId     String             @db.Uuid
+  userId      String?            @db.Uuid
+  userName    String
+  action      IssueHistoryAction
   description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
 
   issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
   user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)

@@ -46,14 +46,14 @@ export class IssueController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List ussues' })
+  @ApiOperation({ summary: 'List issues' })
   @ApiResponse({ type: [ListIssuesResponseDto] })
   list(@Query() filter: ListIssuesFilterDto, @ActiveUser() userType: UserType) {
     return this.issueService.list(userType, filter);
   }
 
   @Get('/open')
-  @ApiOperation({ summary: 'List open ussues' })
+  @ApiOperation({ summary: 'List open issues' })
   @ApiResponse({ type: [ListIssuesResponseDto] })
   listOpenIssues(
     @Query() filter: ListIssuesFilterDto,
@@ -69,7 +69,7 @@ export class IssueController {
     return this.issueService.getById(id, userType.cityId);
   }
 
-  @Get('/me/reported')
+  @Get('/reported/me')
   @ApiOperation({ summary: 'Get the issues reported by user' })
   @ApiResponse({ type: [ListIssuesReportedByUserResponseDto] })
   listReportedByUser(
@@ -79,7 +79,7 @@ export class IssueController {
     return this.issueService.listReportedByUser(userType, filter);
   }
 
-  @Post(':id/me/assign')
+  @Post(':id/assign/me')
   @UseInterceptors(IssueValidationInterceptor)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Assign the user to issue' })
@@ -101,7 +101,7 @@ export class IssueController {
 
   @Post(':id/accept')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Close an issue' })
+  @ApiOperation({ summary: 'Accept an issue' })
   accept(
     @Param('id') id: string,
     @Body() acceptIssueDto: AcceptIssueDto,

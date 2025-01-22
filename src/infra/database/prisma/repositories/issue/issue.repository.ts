@@ -217,6 +217,7 @@ export class IssueRepository {
           issueId: issue.id,
           action: history.action,
           description: history.description,
+          userName: history.userName,
           createdAt: history.createdAt,
           updatedAt: history.updatedAt,
         },

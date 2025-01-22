@@ -1,7 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 
-import { IssueCategory, IssueStatus } from '../entities/issue.entity';
+import {
+  IssueCategory,
+  IssueStatus,
+  IssueType,
+} from '../entities/issue.entity';
 
 class History {
   @IsString()
@@ -11,6 +15,10 @@ class History {
   @IsString()
   @ApiProperty()
   userId: string;
+
+  @IsString()
+  @ApiProperty()
+  userName: string;
 
   @IsString()
   @ApiProperty()
@@ -50,6 +58,10 @@ export class GetIssueByIdResponseDto {
   @IsEnum(IssueCategory)
   @ApiProperty({ enum: IssueCategory })
   category: IssueCategory;
+
+  @IsEnum(IssueType)
+  @ApiProperty({ enum: IssueType })
+  type: IssueType;
 
   @ApiProperty()
   description: string;
