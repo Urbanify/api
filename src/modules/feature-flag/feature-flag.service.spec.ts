@@ -143,4 +143,36 @@ describe('FeatureFlagService', () => {
       expect(response).toEqual([featureFlag]);
     });
   });
+
+  describe('get by id', () => {
+    it('should get feature flag by id', async () => {
+      const featureFlag: FeatureFlag = {
+        id: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
+        slug: 'ff',
+        description: 'description',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      jest
+        .spyOn(featureFlagRepository, 'findById')
+        .mockResolvedValueOnce(featureFlag);
+
+      const response = await service.getById(featureFlag.id);
+
+      expect(response).toBeDefined();
+      expect(response).toEqual(featureFlag);
+      expect(featureFlagRepository.findById).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw a not found exception when feature flag not found', async () => {
+      const id = 'id';
+
+      const notFoundException = new NotFoundException(
+        `feature flag ${id} not found`,
+      );
+
+      expect(service.getById(id)).rejects.toEqual(notFoundException);
+    });
+  });
 });

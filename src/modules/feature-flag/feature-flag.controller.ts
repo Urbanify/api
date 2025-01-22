@@ -13,6 +13,7 @@ import {
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { CreateFeatureFlagDto } from './dto/create-feature-flag.dto';
+import { GetFeatureFlagByIdResponseDto } from './dto/get-feature-flag-by-id.dto';
 import { ListFeatureFlagsResponseDto } from './dto/list-feature-flags.dto';
 import { UpdateFeatureFlagDto } from './dto/update-feature-flag.dto';
 import { FeatureFlagService } from './feature-flag.service';
@@ -34,6 +35,13 @@ export class FeatureFlagController {
   @ApiResponse({ type: [ListFeatureFlagsResponseDto] })
   list() {
     return this.featureFlagService.list();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a flag by id' })
+  @ApiResponse({ type: GetFeatureFlagByIdResponseDto })
+  getById(@Param('id') id: string) {
+    return this.featureFlagService.getById(id);
   }
 
   @Patch(':id')
