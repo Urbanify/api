@@ -256,7 +256,7 @@ describe('AuthService', () => {
   });
 
   describe('update password', () => {
-    it('sould update the user password', async () => {
+    it('should update the user password', async () => {
       const user: User = {
         id: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
         name: 'John',
@@ -281,6 +281,8 @@ describe('AuthService', () => {
 
       const userType: UserType = {
         id: user.id,
+        name: 'John',
+        surname: 'Doe',
         role: user.role,
         cityId: user.cityId,
       };
