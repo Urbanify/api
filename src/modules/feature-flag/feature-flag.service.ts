@@ -21,6 +21,20 @@ export class FeatureFlagService {
     });
   }
 
+  public async list() {
+    return this.featureFlagRepository.list();
+  }
+
+  public async getById(id: string) {
+    const featureFlag = await this.featureFlagRepository.findById(id);
+
+    if (!featureFlag) {
+      throw new NotFoundException(`feature flag ${id} not found`);
+    }
+
+    return featureFlag;
+  }
+
   public async update(id: string, updateFeatureFlagDto: UpdateFeatureFlagDto) {
     const featureFlag = await this.featureFlagRepository.findById(id);
 
