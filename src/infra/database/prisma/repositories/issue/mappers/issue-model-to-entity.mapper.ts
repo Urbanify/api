@@ -90,15 +90,17 @@ export class CityModelToEntityMapper {
       managerId,
       createdAt,
       updatedAt,
-      history: history.map((history) => ({
-        id: history.id,
-        userId: history.userId,
-        userName: history.userName,
-        action: IssueHistoryAction[history.action],
-        description: history.description,
-        createdAt: history.createdAt,
-        updatedAt: history.updatedAt,
-      })),
+      history:
+        history &&
+        history.map((history) => ({
+          id: history.id,
+          userId: history.userId,
+          userName: history.userName,
+          action: IssueHistoryAction[history.action],
+          description: history.description,
+          createdAt: history.createdAt,
+          updatedAt: history.updatedAt,
+        })),
       photos: photos?.map((photo) => photo.url),
       manager: manager && {
         id: manager.id,
