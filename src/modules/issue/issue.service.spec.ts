@@ -682,7 +682,7 @@ describe('IssueService', () => {
     it('should throw a bad request exception when issue status is not WAITING_FOR_PROCEDURE', async () => {
       const issue: Issue = {
         id: '913a1ddb-9582-446e-a62b-0ec56bbf1cb8',
-        status: IssueStatus.WAITING_FOR_FISCAL,
+        status: IssueStatus.CLOSED,
         cityId: '2041dbfb-f0ee-43d2-9566-c041a1949207',
         latitude: 'latitude',
         longitude: 'longitude',
@@ -719,7 +719,7 @@ describe('IssueService', () => {
       };
 
       const badRequestException = new BadRequestException(
-        `could not close issue ${issue.id} because status is not ${IssueStatus.WAITING_FOR_PROCEDURE}`,
+        `could not close issue ${issue.id} because status is not ${IssueStatus.WAITING_FOR_PROCEDURE} or ${IssueStatus.WAITING_FOR_FISCAL}`,
       );
 
       const closeIssueDto: CloseIssueDto = {
