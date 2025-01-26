@@ -163,9 +163,12 @@ export class IssueService {
       throw new NotFoundException(`issue ${id} not found`);
     }
 
-    if (issue.status !== IssueStatus.WAITING_FOR_PROCEDURE) {
+    if (
+      issue.status !== IssueStatus.WAITING_FOR_PROCEDURE &&
+      issue.status !== IssueStatus.WAITING_FOR_FISCAL
+    ) {
       throw new BadRequestException(
-        `could not close issue ${id} because status is not ${IssueStatus.WAITING_FOR_PROCEDURE}`,
+        `could not close issue ${id} because status is not ${IssueStatus.WAITING_FOR_PROCEDURE} or ${IssueStatus.WAITING_FOR_FISCAL}`,
       );
     }
 
@@ -341,7 +344,7 @@ export class IssueService {
       take: filter.take && Number(filter.take),
       start: filter.start,
       end: filter.end,
-      status: filter.status,
+      status: IssueStatus.WAITING_FOR_MANAGER,
       category: filter.category,
     };
 

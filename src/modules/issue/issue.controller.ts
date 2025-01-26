@@ -25,6 +25,10 @@ import {
   ListIssuesReportedByUserFilterDto,
   ListIssuesReportedByUserResponseDto,
 } from './dto/list-issues-reported-by-user.dto';
+import {
+  ListOpenIssuesFilterDto,
+  ListOpenIssuesResponseDto,
+} from './dto/list-open-issues.dto';
 import { ResolutionIssueDto } from './dto/resolution-issue.dto';
 import { SolveIssueDto } from './dto/solve-issue.dto';
 import { IssueValidationInterceptor } from './interceptors/issue.interceptor';
@@ -54,9 +58,9 @@ export class IssueController {
 
   @Get('/open')
   @ApiOperation({ summary: 'List open issues' })
-  @ApiResponse({ type: [ListIssuesResponseDto] })
+  @ApiResponse({ type: [ListOpenIssuesResponseDto] })
   listOpenIssues(
-    @Query() filter: ListIssuesFilterDto,
+    @Query() filter: ListOpenIssuesFilterDto,
     @ActiveUser() userType: UserType,
   ) {
     return this.issueService.listOpenIssues(userType, filter);
