@@ -32,6 +32,7 @@ export class CityModelToEntityMapper {
     history,
     photos,
     manager,
+    comments,
   }: {
     id: string;
     status: PrismaIssueStatus;
@@ -75,6 +76,16 @@ export class CityModelToEntityMapper {
       cpf: string;
       role: PrismaUserRole;
     };
+    comments?: {
+      id: string;
+      text: string;
+      issueId: string;
+      cityId: string;
+      authorId: string;
+      parentId?: string;
+      createdAt: Date;
+      updatedAt: Date;
+    }[];
   }): Issue {
     return {
       id,
@@ -90,15 +101,17 @@ export class CityModelToEntityMapper {
       managerId,
       createdAt,
       updatedAt,
-      history: history.map((history) => ({
-        id: history.id,
-        userId: history.userId,
-        userName: history.userName,
-        action: IssueHistoryAction[history.action],
-        description: history.description,
-        createdAt: history.createdAt,
-        updatedAt: history.updatedAt,
-      })),
+      history:
+        history &&
+        history.map((history) => ({
+          id: history.id,
+          userId: history.userId,
+          userName: history.userName,
+          action: IssueHistoryAction[history.action],
+          description: history.description,
+          createdAt: history.createdAt,
+          updatedAt: history.updatedAt,
+        })),
       photos: photos?.map((photo) => photo.url),
       manager: manager && {
         id: manager.id,
@@ -111,6 +124,7 @@ export class CityModelToEntityMapper {
         createdAt: manager.createdAt,
         updatedAt: manager.updatedAt,
       },
+      comments: comments?.map((comment) => comment),
     };
   }
 }

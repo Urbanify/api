@@ -1,4 +1,5 @@
 import { UserRole } from '@modules/auth/entities/user.entity';
+import { Comment } from '@modules/comment/entities/comment.entity';
 
 export enum IssueStatus {
   WAITING_FOR_FISCAL = 'WAITING_FOR_FISCAL',
@@ -113,4 +114,5 @@ export class Issue {
     createdAt: Date;
     updatedAt: Date;
   };
+  comments?: Comment[];
 }

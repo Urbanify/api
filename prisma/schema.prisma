@@ -33,13 +33,14 @@ model User {
   cpf       String   @unique
   cityId    String?
   role      UserRole @default(RESIDENT)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   issuesReported Issue[]        @relation("reporter")
   issuesFiscal   Issue[]        @relation("fiscal")
   issuesManaged  Issue[]        @relation("manager")
   issueHistory   IssueHistory[]
+  comments       Comment[]
 
   @@map("users")
 }
@@ -49,8 +50,8 @@ model FeatureFlag {
   slug        String
   description String
   deleted     Boolean  @default(false)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   cityFeatures CityFeature[]
 
@@ -73,10 +74,11 @@ model City {
   latitude  String
   longitude String
   status    CityStatus @default(ACTIVE)
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   cityFeatures CityFeature[]
+  comments     Comment[]
 
   @@map("cities")
 }
@@ -86,8 +88,8 @@ model CityFeature {
   cityId        String   @db.Uuid
   featureFlagId String   @db.Uuid
   status        Boolean  @default(false)
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   city        City        @relation(fields: [cityId], references: [id], onDelete: Cascade)
   featureFlag FeatureFlag @relation(fields: [featureFlagId], references: [id], onDelete: Cascade)
@@ -172,14 +174,15 @@ model Issue {
   reporterId  String?       @db.Uuid
   fiscalId    String?       @db.Uuid
   managerId   String?       @db.Uuid
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   reporter User?          @relation("reporter", fields: [reporterId], references: [id], onDelete: SetNull)
   fiscal   User?          @relation("fiscal", fields: [fiscalId], references: [id], onDelete: SetNull)
   manager  User?          @relation("manager", fields: [managerId], references: [id], onDelete: SetNull)
   history  IssueHistory[]
   photos   IssuePhoto[]
+  comments Comment[]
 
   @@index([cityId])
   @@map("issues")
@@ -202,8 +205,8 @@ model IssueHistory {
   userName    String
   action      IssueHistoryAction
   description String?
-  createdAt   DateTime           @default(now()) @map("created_at")
-  updatedAt   DateTime           @updatedAt @map("updated_at")
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
 
   issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
   user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -215,10 +218,29 @@ model IssuePhoto {
   id        String   @id @default(uuid()) @db.Uuid
   issueId   String   @db.Uuid
   url       String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
 
   @@map("issue_photos")
+}
+
+model Comment {
+  id        String   @id @default(uuid()) @db.Uuid
+  text      String
+  issueId   String   @db.Uuid
+  cityId    String   @db.Uuid
+  authorId  String?  @db.Uuid
+  parentId  String?  @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  issue    Issue     @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  city     City      @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  author   User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  parent   Comment?  @relation("parent", fields: [parentId], references: [id], onDelete: Cascade)
+  children Comment[] @relation("parent")
+
+  @@map("comments")
 }
