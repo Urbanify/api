@@ -36,7 +36,7 @@ describe('CommentService', () => {
   });
 
   describe('create', () => {
-    it('it should create a comment', async () => {
+    it('should create a comment', async () => {
       const createInput: CreateCommentDto = {
         text: 'comment',
         issueId: '7ee43ccb-8b2c-40f1-9999-706ea01dd95b',
@@ -58,7 +58,7 @@ describe('CommentService', () => {
   });
 
   describe('reply', () => {
-    it('it should reply a comment', async () => {
+    it('should reply a comment', async () => {
       const parentId = 'e6e3b78d-103e-4501-b579-9f0829f06a2a';
 
       const createInput: CreateCommentDto = {
@@ -81,7 +81,7 @@ describe('CommentService', () => {
   });
 
   describe('delete', () => {
-    it('it should delete a comment', async () => {
+    it('should delete a comment', async () => {
       const comment: Comment = {
         id: '4b9130e4-1c91-4bba-bbc8-0747df00334d',
         text: 'comment',

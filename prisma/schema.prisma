@@ -40,7 +40,6 @@ model User {
   issuesFiscal   Issue[]        @relation("fiscal")
   issuesManaged  Issue[]        @relation("manager")
   issueHistory   IssueHistory[]
-  comments       Comment[]
 
   @@map("users")
 }
@@ -78,7 +77,6 @@ model City {
   updatedAt DateTime   @updatedAt
 
   cityFeatures CityFeature[]
-  comments     Comment[]
 
   @@map("cities")
 }
@@ -231,16 +229,16 @@ model Comment {
   text      String
   issueId   String   @db.Uuid
   cityId    String   @db.Uuid
-  authorId  String?  @db.Uuid
+  authorId  String   @db.Uuid
   parentId  String?  @db.Uuid
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   issue    Issue     @relation(fields: [issueId], references: [id], onDelete: Cascade)
-  city     City      @relation(fields: [cityId], references: [id], onDelete: Cascade)
-  author   User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
   parent   Comment?  @relation("parent", fields: [parentId], references: [id], onDelete: Cascade)
   children Comment[] @relation("parent")
 
+  @@index([cityId])
+  @@index([authorId])
   @@map("comments")
 }

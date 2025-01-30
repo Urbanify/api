@@ -124,7 +124,7 @@ export class CityModelToEntityMapper {
         createdAt: manager.createdAt,
         updatedAt: manager.updatedAt,
       },
-      comments: comments?.map((comment) => comment),
+      comments: comments && comments.map((comment) => comment),
     };
   }
 }
