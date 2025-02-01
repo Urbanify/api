@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './infra/database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CityModule } from './modules/city/city.module';
+import { CommentModule } from './modules/comment/comment.module';
 import { FeatureFlagModule } from './modules/feature-flag/feature-flag.module';
 import { IssueModule } from './modules/issue/issue.module';
 
@@ -19,6 +20,7 @@ import { IssueModule } from './modules/issue/issue.module';
     FeatureFlagModule,
     CityModule,
     IssueModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

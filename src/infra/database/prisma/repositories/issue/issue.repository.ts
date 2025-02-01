@@ -153,6 +153,7 @@ export class IssueRepository {
       include: {
         history: true,
         photos: true,
+        comments: true,
       },
     });
 
