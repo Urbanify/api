@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [FMC-5](https://fixed-my-city.atlassian.net/browse/FMC-5) - Criar funcionalidade de listar feature flags
 - [FMC-6](https://fixed-my-city.atlassian.net/browse/FMC-6) - Expirar token de resetar senha
 - [FMC-8](https://fixed-my-city.atlassian.net/browse/FMC-8) - Criar Módulo de comment
+- [FMC-9](https://fixed-my-city.atlassian.net/browse/FMC-9) - Ajustar tudo que envolve cidade para receber cityId como parametro quando é ADMIN
 
 ### Changed
 
