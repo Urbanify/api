@@ -32,6 +32,7 @@ export class CityModelToEntityMapper {
     history,
     photos,
     manager,
+    comments,
   }: {
     id: string;
     status: PrismaIssueStatus;
@@ -75,6 +76,16 @@ export class CityModelToEntityMapper {
       cpf: string;
       role: PrismaUserRole;
     };
+    comments?: {
+      id: string;
+      text: string;
+      issueId: string;
+      cityId: string;
+      authorId: string;
+      parentId?: string;
+      createdAt: Date;
+      updatedAt: Date;
+    }[];
   }): Issue {
     return {
       id,
@@ -113,6 +124,7 @@ export class CityModelToEntityMapper {
         createdAt: manager.createdAt,
         updatedAt: manager.updatedAt,
       },
+      comments: comments && comments.map((comment) => comment),
     };
   }
 }
