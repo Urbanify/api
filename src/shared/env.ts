@@ -15,9 +15,6 @@ class Env {
   apiKey: string;
 
   @IsString()
-  directUrl: string;
-
-  @IsString()
   mailgunKey: string;
 
   @IsString()
@@ -35,7 +32,6 @@ export const env: Env = plainToInstance(Env, {
   jwtSecret: process.env.JWT_SECRET,
   databaseUrl: process.env.DATABASE_URL,
   apiKey: process.env.API_KEY,
-  directUrl: process.env.DIRECT_URL,
   mailgunKey: process.env.MAILGUN_KEY,
   mailgunUrl: process.env.MAILGUN_URL,
   mailServiceFrom: process.env.MAIL_SERVICE_FROM,
