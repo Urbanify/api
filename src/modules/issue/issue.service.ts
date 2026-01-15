@@ -9,6 +9,7 @@ import { UserType } from '@shared/decorators/active-user.decorator';
 import { UUIDGenerator } from '@shared/uuid-generator';
 
 import { AcceptIssueDto } from './dto/accept-issue.dto';
+import { AskNewSolutionDto } from './dto/ask-new-solution-issue.dto';
 import { CloseIssueDto } from './dto/close-issue.dto';
 import { CreateIssueDto } from './dto/create-issue.dto';
 import { ListIssuesFilterDto } from './dto/list-issues.dto';
@@ -352,5 +353,45 @@ export class IssueService {
       await this.issueRepository.listWithManagerRelation(queryFilter);
 
     return issuesPaginated;
+  }
+
+  public async askNewSolution(
+    id: string,
+    askNewSolutionDto: AskNewSolutionDto,
+    userType: UserType,
+  ) {
+    const issue = await this.issueRepository.findById(id, userType.cityId);
+
+    if (!issue) {
+      throw new NotFoundException(`issue ${id} not found`);
+    }
+
+    if (issue.status !== IssueStatus.WAITING_FOR_RESOLUTION_VALIDATION) {
+      throw new BadRequestException(
+        `could not ask new solution for issue ${id} because status is not ${IssueStatus.WAITING_FOR_RESOLUTION_VALIDATION}`,
+      );
+    }
+
+    const userId = userType.id;
+
+    if (issue.fiscalId !== userId && issue.reporterId !== userId) {
+      throw new BadRequestException(
+        `could not ask new solution because user ${userId} not assigned`,
+      );
+    }
+
+    issue.history = [];
+    issue.status = IssueStatus.WAITING_FOR_MANAGER_RESOLUTION;
+    issue.history.push({
+      id: UUIDGenerator.generate(),
+      userId: userType.id,
+      userName: `${userType.name} ${userType.surname}`,
+      action: IssueHistoryAction.REQUESTED_NEW_SOLUTION,
+      description: askNewSolutionDto.description,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await this.issueRepository.update(issue);
   }
 }

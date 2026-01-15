@@ -56,7 +56,7 @@ export class CityRepository {
     });
   }
 
-  public async update(city: City): Promise<void> {
+  public async update(city): Promise<void> {
     const data = CityEntityToModelMapper.map(city);
 
     const cityFeaturesUpdatedPromises = data.cityFeatures.map((cityFeature) => {

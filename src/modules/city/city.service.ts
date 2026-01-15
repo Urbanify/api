@@ -33,7 +33,7 @@ export class CityService {
       featureFlags: featureFlags.map((featureFlag) => ({
         cityId: id,
         featureFlagId: featureFlag.id,
-        status: false,
+        status: true,
         description: featureFlag.description,
         slug: featureFlag.slug,
         createdAt: featureFlag.createdAt,

@@ -9,4 +9,4 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_DB: urbanify
     ports:
-      - "5432:5432"
+      - '5432:5432'

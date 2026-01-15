@@ -14,31 +14,11 @@ import { CityStatus } from '../entities/city.entity';
 class FeatureFlag {
   @IsString()
   @ApiProperty()
-  cityId: string;
-
-  @IsString()
-  @ApiProperty()
   featureFlagId: string;
-
-  @IsString()
-  @ApiProperty()
-  slug: string;
-
-  @IsString()
-  @ApiProperty()
-  description: string;
 
   @IsBoolean()
   @ApiProperty()
   status: boolean;
-
-  @IsString()
-  @ApiProperty()
-  createdAt: Date;
-
-  @IsString()
-  @ApiProperty()
-  updatedAt: Date;
 }
 
 export class UpdateCityDto extends CreateCityDto {

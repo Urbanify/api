@@ -14,6 +14,7 @@ import { ActiveUser, UserType } from '@shared/decorators/active-user.decorator';
 import { AuthValidationInterceptor } from '@shared/interceptors/auth.interceptor';
 
 import { AcceptIssueDto } from './dto/accept-issue.dto';
+import { AskNewSolutionDto } from './dto/ask-new-solution-issue.dto';
 import { CloseIssueDto } from './dto/close-issue.dto';
 import { CreateIssueDto } from './dto/create-issue.dto';
 import { GetIssueByIdResponseDto } from './dto/get-issue-by-id.dto';
@@ -136,5 +137,17 @@ export class IssueController {
     @ActiveUser() userType: UserType,
   ) {
     return this.issueService.solve(id, solveIssueDto, userType);
+  }
+
+  @Post(':id/ask-new-solution')
+  @UseInterceptors(IssueValidationInterceptor)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Ask for a new solution' })
+  askNewSolution(
+    @Param('id') id: string,
+    @Body() askNewSolutionDto: AskNewSolutionDto,
+    @ActiveUser() userType: UserType,
+  ) {
+    return this.issueService.askNewSolution(id, askNewSolutionDto, userType);
   }
 }

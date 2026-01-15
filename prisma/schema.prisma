@@ -194,6 +194,7 @@ enum IssueHistoryAction {
   MARKED_AS_VALID
   ADDED_RESOLUTION
   MARKED_AS_SOLVED
+  REQUESTED_NEW_SOLUTION
 }
 
 model IssueHistory {

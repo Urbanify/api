@@ -10,7 +10,7 @@ export class CityEntityToModelMapper {
     createdAt,
     updatedAt,
     featureFlags,
-  }: City) {
+  }: Partial<City>) {
     const data = {
       id,
       name,

@@ -143,13 +143,8 @@ describe('CityService', () => {
         status: CityStatus.ACTIVE,
         featureFlags: [
           {
-            cityId: '2041dbfb-f0ee-43d2-9566-c041a1949207',
             featureFlagId: '018a3b16-6ed1-465d-9b46-32f87bbd76f8',
-            slug: 'ff',
-            description: 'description',
             status: true,
-            createdAt: new Date(),
-            updatedAt: new Date(),
           },
         ],
       };
@@ -170,13 +165,8 @@ describe('CityService', () => {
         status: CityStatus.ACTIVE,
         featureFlags: [
           {
-            cityId: id,
             featureFlagId: '018a3b16-6ed1-465d-9b46-32f87bbd76f8',
-            slug: 'ff',
-            description: 'description',
             status: true,
-            createdAt: new Date(),
-            updatedAt: new Date(),
           },
         ],
       };

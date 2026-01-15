@@ -5,6 +5,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserType } from '@shared/decorators/active-user.decorator';
 
 import { AcceptIssueDto } from './dto/accept-issue.dto';
+import { AskNewSolutionDto } from './dto/ask-new-solution-issue.dto';
 import { CloseIssueDto } from './dto/close-issue.dto';
 import { CreateIssueDto } from './dto/create-issue.dto';
 import { ListIssuesFilterDto } from './dto/list-issues.dto';
@@ -1461,6 +1462,156 @@ describe('IssueService', () => {
       expect(
         service.resolution(issue.id, resolutionIssueDto, user),
       ).rejects.toEqual(badRequestException);
+    });
+  });
+
+  describe('askNewSolution', () => {
+    it('should ask for a new solution when user is reporter', async () => {
+      const issue: Issue = {
+        id: '913a1ddb-9582-446e-a62b-0ec56bbf1cb8',
+        status: IssueStatus.WAITING_FOR_RESOLUTION_VALIDATION,
+        cityId: '2041dbfb-f0ee-43d2-9566-c041a1949207',
+        latitude: 'latitude',
+        longitude: 'longitude',
+        category: IssueCategory.INFRASTRUCTURE,
+        type: IssueType.ABANDONED_CONSTRUCTION,
+        description: 'description',
+        reporterId: 'adacd030-c54c-49a1-a1bd-63fc0f32a4e1',
+        fiscalId: '5e5cae03-42db-4dc6-8e42-f739c62d346d',
+        managerId: '07b089f6-169d-41ac-9ccd-2fcd3707aab3',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        history: [],
+        photos: ['myphoto'],
+      };
+
+      jest.spyOn(issueRepository, 'findById').mockResolvedValueOnce(issue);
+
+      const user: UserType = {
+        id: 'adacd030-c54c-49a1-a1bd-63fc0f32a4e1',
+        name: 'John',
+        surname: 'Doe',
+        role: UserRole.RESIDENT,
+        cityId: '2041dbfb-f0ee-43d2-9566-c041a1949207',
+      };
+
+      const dto: AskNewSolutionDto = {
+        description: 'Still broken',
+      };
+
+      await service.askNewSolution(issue.id, dto, user);
+
+      expect(issueRepository.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('should ask for a new solution when user is fiscal', async () => {
+      const issue: Issue = {
+        id: '913a1ddb-9582-446e-a62b-0ec56bbf1cb8',
+        status: IssueStatus.WAITING_FOR_RESOLUTION_VALIDATION,
+        cityId: '2041dbfb-f0ee-43d2-9566-c041a1949207',
+        latitude: 'latitude',
+        longitude: 'longitude',
+        category: IssueCategory.INFRASTRUCTURE,
+        type: IssueType.ABANDONED_CONSTRUCTION,
+        description: 'description',
+        reporterId: 'adacd030-c54c-49a1-a1bd-63fc0f32a4e1',
+        fiscalId: '5e5cae03-42db-4dc6-8e42-f739c62d346d',
+        managerId: '07b089f6-169d-41ac-9ccd-2fcd3707aab3',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        history: [],
+        photos: ['myphoto'],
+      };
+
+      jest.spyOn(issueRepository, 'findById').mockResolvedValueOnce(issue);
+
+      const user: UserType = {
+        id: '5e5cae03-42db-4dc6-8e42-f739c62d346d',
+        name: 'Fiscal',
+        surname: 'User',
+        role: UserRole.RESIDENT,
+        cityId: '2041dbfb-f0ee-43d2-9566-c041a1949207',
+      };
+
+      const dto: AskNewSolutionDto = {
+        description: 'Still broken',
+      };
+
+      await service.askNewSolution(issue.id, dto, user);
+
+      expect(issueRepository.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw BadRequestException if status is not WAITING_FOR_RESOLUTION_VALIDATION', async () => {
+      const issue: Issue = {
+        id: '913a1ddb-9582-446e-a62b-0ec56bbf1cb8',
+        status: IssueStatus.SOLVED,
+        cityId: '2041dbfb-f0ee-43d2-9566-c041a1949207',
+        latitude: 'latitude',
+        longitude: 'longitude',
+        category: IssueCategory.INFRASTRUCTURE,
+        type: IssueType.ABANDONED_CONSTRUCTION,
+        description: 'description',
+        reporterId: 'rep-id',
+        fiscalId: 'fis-id',
+        managerId: 'man-id',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        history: [],
+        photos: [],
+      };
+
+      jest.spyOn(issueRepository, 'findById').mockResolvedValueOnce(issue);
+
+      const user: UserType = {
+        id: 'rep-id',
+        name: 'John',
+        surname: 'Doe',
+        role: UserRole.RESIDENT,
+        cityId: '2041dbfb-f0ee-43d2-9566-c041a1949207',
+      };
+
+      const dto: AskNewSolutionDto = { description: 'desc' };
+
+      await expect(service.askNewSolution(issue.id, dto, user)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw BadRequestException if user is not reporter or fiscal', async () => {
+      const issue: Issue = {
+        id: '913a1ddb-9582-446e-a62b-0ec56bbf1cb8',
+        status: IssueStatus.WAITING_FOR_RESOLUTION_VALIDATION,
+        cityId: '2041dbfb-f0ee-43d2-9566-c041a1949207',
+        latitude: 'latitude',
+        longitude: 'longitude',
+        category: IssueCategory.INFRASTRUCTURE,
+        type: IssueType.ABANDONED_CONSTRUCTION,
+        description: 'description',
+        reporterId: 'rep-id',
+        fiscalId: 'fis-id',
+        managerId: 'man-id',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        history: [],
+        photos: [],
+      };
+
+      jest.spyOn(issueRepository, 'findById').mockResolvedValueOnce(issue);
+
+      const user: UserType = {
+        id: 'other-id',
+        name: 'Other',
+        surname: 'User',
+        role: UserRole.RESIDENT,
+        cityId: '2041dbfb-f0ee-43d2-9566-c041a1949207',
+      };
+
+      const dto: AskNewSolutionDto = { description: 'desc' };
+
+      await expect(service.askNewSolution(issue.id, dto, user)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
