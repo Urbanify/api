@@ -35,6 +35,8 @@ export class NotResidentValidationInterceptor implements NestInterceptor {
       if (role === UserRole.RESIDENT) {
         throw new UnauthorizedException();
       }
+
+      request['user'] = user;
     } catch (error) {
       throw new UnauthorizedException();
     }

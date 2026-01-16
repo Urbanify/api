@@ -10,6 +10,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ActiveUser, UserType } from '@shared/decorators/active-user.decorator';
 import { AdminOrOwnerValidationInterceptor } from '@shared/interceptors/admin-or-owner.interceptor';
+import { AuthValidationInterceptor } from '@shared/interceptors/auth.interceptor';
 import { NotResidentValidationInterceptor } from '@shared/interceptors/not-resident.interceptor';
 
 import { ChangeRoleDto } from './dto/change-role.dto';
@@ -17,7 +18,6 @@ import { ListUsersQueryDto } from './dto/list-users.dto';
 import { ListUsersResponseDto } from './dto/list-users-response.dto';
 import { UserMeResponseDto } from './dto/user-me-response.dto';
 import { UserService } from './user.service';
-import { AuthValidationInterceptor } from '@shared/interceptors/auth.interceptor';
 
 @ApiTags('Users')
 @Controller('users')
