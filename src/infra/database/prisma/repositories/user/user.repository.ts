@@ -117,20 +117,41 @@ export class UserRepository {
         };
       }
       if (!isCpf && !isEmail) {
-        where.OR = [
-          {
-            name: {
-              contains: filter.search,
-              mode: 'insensitive',
+        const terms = filter.search.trim().split(/\s+/).filter(Boolean);
+
+        if (terms.length > 1) {
+          where.AND = terms.map((term) => ({
+            OR: [
+              {
+                name: {
+                  contains: term,
+                  mode: 'insensitive',
+                },
+              },
+              {
+                surname: {
+                  contains: term,
+                  mode: 'insensitive',
+                },
+              },
+            ],
+          }));
+        } else {
+          where.OR = [
+            {
+              name: {
+                contains: filter.search,
+                mode: 'insensitive',
+              },
             },
-          },
-          {
-            surname: {
-              contains: filter.search,
-              mode: 'insensitive',
+            {
+              surname: {
+                contains: filter.search,
+                mode: 'insensitive',
+              },
             },
-          },
-        ];
+          ];
+        }
       }
     }
 
