@@ -4,6 +4,8 @@ import { UserType } from '@shared/decorators/active-user.decorator';
 import { UUIDGenerator } from '@shared/uuid-generator';
 
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { ListCommentsFilterDto } from './dto/list-comments.dto';
+import { Comment } from './entities/comment.entity';
 
 @Injectable()
 export class CommentService {
@@ -50,5 +52,25 @@ export class CommentService {
     }
 
     await this.commentRepository.delete(id, userType);
+  }
+
+  public async list(
+    userType: UserType,
+    filter: ListCommentsFilterDto,
+  ): Promise<{
+    items: Comment[];
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    currentPage: number;
+    take: number;
+  }> {
+    const queryFilter = {
+      cityId: userType.cityId,
+      issueId: filter.issueId,
+      page: Number(filter.page),
+      take: filter.take && Number(filter.take),
+    };
+
+    return this.commentRepository.list(queryFilter);
   }
 }

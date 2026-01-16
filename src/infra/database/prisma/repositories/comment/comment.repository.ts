@@ -6,6 +6,13 @@ import { CommentEntityToModelMapper } from './mappers/comment-entity-to-model.ma
 import { CommentModelToEntityMapper } from './mappers/comment-model-to-entity.mapper';
 import { PrismaService } from '../../prisma.service';
 
+type ListCommentsQueryFilter = {
+  issueId: string;
+  cityId: string;
+  page: number;
+  take?: number;
+};
+
 @Injectable()
 export class CommentRepository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -27,6 +34,9 @@ export class CommentRepository {
         id,
         authorId: userType.id,
       },
+      include: {
+        author: true,
+      },
     });
 
     if (!commentModel) {
@@ -43,5 +53,51 @@ export class CommentRepository {
         authorId: userType.id,
       },
     });
+  }
+
+  public async list(queryFilter: ListCommentsQueryFilter): Promise<{
+    items: Comment[];
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    currentPage: number;
+    take: number;
+  }> {
+    const page = queryFilter.page;
+    const take = queryFilter.take || 10;
+    const skip = (page - 1) * take;
+
+    const commentsModel = await this.prismaService.comment.findMany({
+      where: {
+        issueId: queryFilter.issueId,
+        cityId: queryFilter.cityId,
+      },
+      include: {
+        author: true,
+      },
+      take: take + 1,
+      skip,
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+
+    const hasNextPage = commentsModel.length > take;
+    const hasPreviousPage = page > 1;
+
+    if (hasNextPage) {
+      commentsModel.pop();
+    }
+
+    const comments = commentsModel.map((commentModel) =>
+      CommentModelToEntityMapper.map(commentModel),
+    );
+
+    return {
+      hasNextPage,
+      hasPreviousPage,
+      take,
+      items: comments,
+      currentPage: page,
+    };
   }
 }

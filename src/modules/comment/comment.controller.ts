@@ -2,16 +2,22 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Post,
+  Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ActiveUser, UserType } from '@shared/decorators/active-user.decorator';
 import { AuthValidationInterceptor } from '@shared/interceptors/auth.interceptor';
 
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import {
+  ListCommentsFilterDto,
+  ListCommentsPaginatedResponseDto,
+} from './dto/list-comments.dto';
 
 @UseInterceptors(AuthValidationInterceptor)
 @Controller('comments')
@@ -25,6 +31,16 @@ export class CommentController {
     @ActiveUser() userType: UserType,
   ) {
     return this.commentService.create(createCommentDto, userType);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'List comments' })
+  @ApiResponse({ type: ListCommentsPaginatedResponseDto })
+  list(
+    @Query() filter: ListCommentsFilterDto,
+    @ActiveUser() userType: UserType,
+  ) {
+    return this.commentService.list(userType, filter);
   }
 
   @Post(':id/reply')

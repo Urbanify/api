@@ -22,6 +22,13 @@ describe('CommentService', () => {
             create: jest.fn().mockResolvedValue(null),
             findById: jest.fn().mockResolvedValue(null),
             delete: jest.fn().mockResolvedValue(null),
+            list: jest.fn().mockResolvedValue({
+              items: [],
+              hasNextPage: false,
+              hasPreviousPage: false,
+              currentPage: 1,
+              take: 10,
+            }),
           },
         },
       ],
@@ -122,6 +129,33 @@ describe('CommentService', () => {
       );
 
       expect(service.delete(id, user)).rejects.toEqual(notFoundException);
+    });
+  });
+
+  describe('list', () => {
+    it('should list comments by issue', async () => {
+      const user: UserType = {
+        id: '8cb4c3b7-0933-4c70-b307-0ced2dc3f4f9',
+        name: 'John',
+        surname: 'Doe',
+        role: UserRole.ADMIN,
+        cityId: '2041dbfb-f0ee-43d2-9566-c041a1949207',
+      };
+
+      const result = await service.list(user, {
+        issueId: '7ee43ccb-8b2c-40f1-9999-706ea01dd95b',
+        page: 1,
+        take: 10,
+      });
+
+      expect(commentRepository.list).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        items: [],
+        hasNextPage: false,
+        hasPreviousPage: false,
+        currentPage: 1,
+        take: 10,
+      });
     });
   });
 });

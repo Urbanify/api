@@ -40,6 +40,7 @@ model User {
   issuesFiscal   Issue[]        @relation("fiscal")
   issuesManaged  Issue[]        @relation("manager")
   issueHistory   IssueHistory[]
+  comments       Comment[]
 
   @@map("users")
 }
@@ -236,6 +237,7 @@ model Comment {
   updatedAt DateTime @updatedAt
 
   issue    Issue     @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   parent   Comment?  @relation("parent", fields: [parentId], references: [id], onDelete: Cascade)
   children Comment[] @relation("parent")
 
