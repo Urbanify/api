@@ -15,7 +15,15 @@ export class ListUsersQueryDto {
   take?: number = 10;
 
   @IsOptional()
-  @Transform(({ value }) => value.split(','))
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) {
+      return value;
+    }
+    if (typeof value === 'string') {
+      return value.split(',').filter(Boolean);
+    }
+    return [];
+  })
   @IsEnum(UserRole, { each: true })
   @ApiProperty({ required: false, enum: UserRole, isArray: true })
   roles?: UserRole[];
