@@ -78,6 +78,9 @@
       "prettier -w"
     ]
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "jest": {
     "moduleNameMapper": {
       "@modules/(.*)": "<rootDir>/modules/$1",

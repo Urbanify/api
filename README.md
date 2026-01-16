@@ -45,6 +45,13 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## Seed
+
+```bash
+# run seed against current DATABASE_URL/DIRECT_URL
+$ npx prisma db seed
+```
+
 ## Test
 
 ```bash
