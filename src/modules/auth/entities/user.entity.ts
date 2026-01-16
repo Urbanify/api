@@ -18,3 +18,11 @@ export class User {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type Paginated<T> = {
+  items: T[];
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  currentPage: number;
+  take: number;
+};

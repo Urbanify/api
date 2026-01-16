@@ -9,6 +9,7 @@ import { CityModule } from './modules/city/city.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { FeatureFlagModule } from './modules/feature-flag/feature-flag.module';
 import { IssueModule } from './modules/issue/issue.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { IssueModule } from './modules/issue/issue.module';
     CityModule,
     IssueModule,
     CommentModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

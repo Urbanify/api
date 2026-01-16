@@ -31,7 +31,7 @@ model User {
   email     String   @unique
   password  String
   cpf       String   @unique
-  cityId    String?
+  cityId    String?  @db.Uuid
   role      UserRole @default(RESIDENT)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -41,6 +41,7 @@ model User {
   issuesManaged  Issue[]        @relation("manager")
   issueHistory   IssueHistory[]
   comments       Comment[]
+  city           City?          @relation(fields: [cityId], references: [id], onDelete: SetNull)
 
   @@map("users")
 }
@@ -78,6 +79,9 @@ model City {
   updatedAt DateTime   @updatedAt
 
   cityFeatures CityFeature[]
+  users        User[]
+  issues       Issue[]
+  comments     Comment[]
 
   @@map("cities")
 }
@@ -164,7 +168,7 @@ enum IssueType {
 model Issue {
   id          String        @id @default(uuid()) @db.Uuid
   status      IssueStatus   @default(WAITING_FOR_FISCAL)
-  cityId      String
+  cityId      String        @db.Uuid
   latitude    String
   longitude   String
   category    IssueCategory
@@ -182,8 +186,8 @@ model Issue {
   history  IssueHistory[]
   photos   IssuePhoto[]
   comments Comment[]
+  city     City           @relation(fields: [cityId], references: [id], onDelete: Cascade)
 
-  @@index([cityId])
   @@map("issues")
 }
 
@@ -240,8 +244,7 @@ model Comment {
   author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   parent   Comment?  @relation("parent", fields: [parentId], references: [id], onDelete: Cascade)
   children Comment[] @relation("parent")
+  city     City      @relation(fields: [cityId], references: [id], onDelete: Cascade)
 
-  @@index([cityId])
-  @@index([authorId])
   @@map("comments")
 }
