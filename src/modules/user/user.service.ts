@@ -34,32 +34,71 @@ export class UserService {
       throw new BadRequestException('User not found');
     }
 
+    if (currentUser.role !== UserRole.ADMIN && user.role === UserRole.ADMIN) {
+      throw new BadRequestException('Only admin can change admin role');
+    }
+
+    if (currentUser.role === UserRole.ADMIN) {
+      user.role = role;
+      await this.userRepository.update(user);
+      return;
+    }
+
     if (currentUser.role === UserRole.OWNER) {
       if (user.role === UserRole.OWNER) {
-        throw new BadRequestException('Owner cannot change other owner role');
+        if (role !== UserRole.OWNER) {
+          throw new BadRequestException('Owner cannot remove other owner role');
+        }
+      }
+
+      if (
+        role !== UserRole.OWNER &&
+        role !== UserRole.MANAGER &&
+        role !== UserRole.FINANCIAL &&
+        role !== UserRole.RESIDENT
+      ) {
+        throw new BadRequestException('Owner cannot change to this role');
       }
 
       user.role = role;
+      await this.userRepository.update(user);
+      return;
     }
 
     if (currentUser.role === UserRole.FINANCIAL) {
-      if (user.role !== UserRole.RESIDENT || role !== UserRole.FINANCIAL) {
-        throw new BadRequestException(
-          'Financial cannot change other financial role',
-        );
+      if (role !== UserRole.FINANCIAL) {
+        throw new BadRequestException('Financial cannot change to this role');
+      }
+
+      if (user.role !== UserRole.RESIDENT && user.role !== UserRole.FINANCIAL) {
+        throw new BadRequestException('Financial cannot change other role');
       }
 
       user.role = role;
+      await this.userRepository.update(user);
+      return;
     }
 
     if (currentUser.role === UserRole.MANAGER) {
-      if (role !== UserRole.MANAGER) {
-        throw new BadRequestException('Manager cannot change to this role');
+      if (role === UserRole.MANAGER) {
+        user.role = role;
+        await this.userRepository.update(user);
+        return;
       }
-      user.role = role;
+
+      if (role === UserRole.RESIDENT) {
+        if (user.role !== UserRole.MANAGER) {
+          throw new BadRequestException('Manager can only remove manager role');
+        }
+        user.role = role;
+        await this.userRepository.update(user);
+        return;
+      }
+
+      throw new BadRequestException('Manager cannot change to this role');
     }
 
-    await this.userRepository.update(user);
+    throw new BadRequestException('Role change not allowed');
   }
 
   public async getMe(userId: string) {

@@ -117,10 +117,20 @@ export class UserRepository {
         };
       }
       if (!isCpf && !isEmail) {
-        where.name = {
-          contains: filter.search,
-          mode: 'insensitive',
-        };
+        where.OR = [
+          {
+            name: {
+              contains: filter.search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            surname: {
+              contains: filter.search,
+              mode: 'insensitive',
+            },
+          },
+        ];
       }
     }
 
