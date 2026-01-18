@@ -7,6 +7,7 @@ import { DatabaseModule } from './infra/database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CityModule } from './modules/city/city.module';
 import { CommentModule } from './modules/comment/comment.module';
+import { CrimeModule } from './modules/crime/crime.module';
 import { FeatureFlagModule } from './modules/feature-flag/feature-flag.module';
 import { IssueModule } from './modules/issue/issue.module';
 import { UserModule } from './modules/user/user.module';
@@ -23,6 +24,7 @@ import { UserModule } from './modules/user/user.module';
     IssueModule,
     CommentModule,
     UserModule,
+    CrimeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

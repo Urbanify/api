@@ -248,3 +248,52 @@ model Comment {
 
   @@map("comments")
 }
+
+enum CrimeCategory {
+  VIOLENCE
+  THEFT
+  VANDALISM
+  FRAUD
+  DRUGS
+  TRAFFIC
+
+  @@map("crime_category")
+}
+
+enum CrimeType {
+  ASSAULT
+  ROBBERY
+  ARMED_ROBBERY
+  THREAT
+  BURGLARY
+  VEHICLE_THEFT
+  PICKPOCKET
+  VANDALISM_PROPERTY
+  GRAFFITI
+  PUBLIC_DAMAGE
+  SCAM
+  DOCUMENT_FRAUD
+  CARD_FRAUD
+  DRUG_TRAFFICKING
+  DRUG_USE
+  TRAFFIC_ACCIDENT
+  DUI
+  DANGEROUS_DRIVING
+
+  @@map("crime_type")
+}
+
+model Crime {
+  id        String        @id @default(uuid()) @db.Uuid
+  category  CrimeCategory
+  type      CrimeType
+  latitude  String
+  longitude String
+  address   String
+  date      DateTime
+  details   String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@map("crimes")
+}
