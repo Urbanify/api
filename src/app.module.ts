@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './infra/database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { BuildingModule } from './modules/building/building.module';
 import { CityModule } from './modules/city/city.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { CrimeModule } from './modules/crime/crime.module';
@@ -25,6 +26,7 @@ import { UserModule } from './modules/user/user.module';
     CommentModule,
     UserModule,
     CrimeModule,
+    BuildingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
