@@ -1,0 +1,34 @@
+# Staging (demo) on Render's free plan. Production will run elsewhere.
+# The free instance sleeps after 15 min idle and takes ~1 min to wake up.
+services:
+  - type: web
+    name: urbanify-api-stg
+    runtime: node
+    plan: free
+    region: virginia
+    branch: stg
+    buildCommand: npm ci && npm run build && npx prisma migrate deploy && npx prisma db seed
+    startCommand: npm run start:prod
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 20.10.0
+      # Paste both from Supabase > Connect: DATABASE_URL is the transaction pooler (port 6543,
+      # add ?pgbouncer=true), DIRECT_URL is the session pooler (port 5432).
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: API_KEY
+        generateValue: true
+      # Email is off in staging: the client starts with these placeholders and sending fails silently.
+      - key: MAILGUN_KEY
+        value: disabled
+      - key: MAILGUN_URL
+        value: disabled.invalid
+      - key: MAIL_SERVICE_FROM
+        value: Urbanify <noreply@urbanify.com.br>
+      - key: FRONTEND_URL
+        value: https://stg.urbanify.com.br/update-password

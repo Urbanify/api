@@ -20,7 +20,13 @@ export class UserService {
 
     const usersPaginated = await this.userRepository.list(queryFilter);
 
-    return usersPaginated;
+    // Never send password hashes to the client.
+    return {
+      ...usersPaginated,
+      items: usersPaginated.items.map(
+        ({ password: _password, ...user }) => user,
+      ),
+    };
   }
 
   public async changeRole(

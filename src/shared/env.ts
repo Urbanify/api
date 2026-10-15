@@ -28,7 +28,7 @@ class Env {
 }
 
 export const env: Env = plainToInstance(Env, {
-  port: process.env.SERVER_PORT,
+  port: process.env.SERVER_PORT ?? process.env.PORT,
   jwtSecret: process.env.JWT_SECRET,
   databaseUrl: process.env.DATABASE_URL,
   apiKey: process.env.API_KEY,
