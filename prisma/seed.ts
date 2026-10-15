@@ -9,6 +9,8 @@ import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { createHash } from 'node:crypto';
 
+import { seedPlaces } from './places/seed-places';
+
 // Demo seed for the staging environment: the city of Aracaju (SE) with
 // issues at every stage of the workflow. It is idempotent and resets the
 // demo city on every run, so each deploy starts from the same state.
@@ -509,6 +511,8 @@ async function main() {
       });
     }
   }
+
+  await seedPlaces(prisma, city.id);
 }
 
 main()
