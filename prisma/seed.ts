@@ -454,6 +454,11 @@ async function main() {
         description: 'Confirmo que foi resolvido. Obrigado!',
       });
 
+    // The last history step is the time the issue entered its current status (drives the 3-day rule).
+    const lastStepAt = new Date(
+      createdAt.getTime() + (history.length - 1) * 5 * hour,
+    );
+
     const data = {
       status: STATUS[stage],
       cityId: city.id,
@@ -466,6 +471,7 @@ async function main() {
       fiscalId: fiscal?.id ?? null,
       managerId: reached('in_progress') ? manager.id : null,
       createdAt,
+      updatedAt: lastStepAt,
     };
     await prisma.issue.upsert({
       where: { id },
