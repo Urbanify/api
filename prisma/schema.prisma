@@ -82,6 +82,7 @@ model City {
   users        User[]
   issues       Issue[]
   comments     Comment[]
+  places       CityPlace[]
 
   @@map("cities")
 }
@@ -334,4 +335,37 @@ model LoginCode {
 
   @@index([email])
   @@map("login_codes")
+}
+
+enum PlaceCategory {
+  HEALTH
+  EDUCATION
+  WASTE
+  TOURISM
+  SERVICES
+  LEISURE
+
+  @@map("place_category")
+}
+
+model CityPlace {
+  id          String        @id @default(uuid()) @db.Uuid
+  cityId      String        @db.Uuid
+  name        String
+  category    PlaceCategory
+  address     String?
+  phone       String?
+  hours       String?
+  description String?
+  latitude    Float
+  longitude   Float
+  published   Boolean       @default(true)
+  source      String        @default("manual")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  city City @relation(fields: [cityId], references: [id], onDelete: Cascade)
+
+  @@index([cityId, published])
+  @@map("city_places")
 }

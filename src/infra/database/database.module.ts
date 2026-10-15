@@ -6,6 +6,7 @@ import { CommentRepository } from './prisma/repositories/comment/comment.reposit
 import { FeatureFlagRepository } from './prisma/repositories/feature-flag/feature-flag.repository';
 import { IssueRepository } from './prisma/repositories/issue/issue.repository';
 import { LoginCodeRepository } from './prisma/repositories/login-code/login-code.repository';
+import { PlaceRepository } from './prisma/repositories/place/place.repository';
 import { UserRepository } from './prisma/repositories/user/user.repository';
 
 @Global()
@@ -18,6 +19,7 @@ import { UserRepository } from './prisma/repositories/user/user.repository';
     IssueRepository,
     CommentRepository,
     LoginCodeRepository,
+    PlaceRepository,
   ],
   exports: [
     PrismaService,
@@ -27,6 +29,7 @@ import { UserRepository } from './prisma/repositories/user/user.repository';
     IssueRepository,
     CommentRepository,
     LoginCodeRepository,
+    PlaceRepository,
   ],
 })
 export class DatabaseModule {}

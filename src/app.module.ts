@@ -11,6 +11,7 @@ import { CommentModule } from './modules/comment/comment.module';
 import { CrimeModule } from './modules/crime/crime.module';
 import { FeatureFlagModule } from './modules/feature-flag/feature-flag.module';
 import { IssueModule } from './modules/issue/issue.module';
+import { PlaceModule } from './modules/place/place.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -27,6 +28,7 @@ import { UserModule } from './modules/user/user.module';
     UserModule,
     CrimeModule,
     BuildingModule,
+    PlaceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
