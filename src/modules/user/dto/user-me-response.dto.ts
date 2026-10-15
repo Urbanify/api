@@ -10,8 +10,8 @@ export class UserMeResponseDto {
   @ApiProperty()
   email: string;
 
-  @ApiProperty()
-  cpf: string;
+  @ApiProperty({ nullable: true })
+  cpf: string | null;
 
   @ApiProperty()
   fiscalOfIssuesCount: number;

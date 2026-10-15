@@ -1,7 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsString, IsUUID } from 'class-validator';
 
 export class SignupDto {
+  @IsString()
+  @ApiProperty({
+    description:
+      'Returned by POST /auth/otp/verify when the email has no account',
+  })
+  signupToken: string;
+
   @IsString()
   @ApiProperty()
   name: string;
@@ -10,16 +17,7 @@ export class SignupDto {
   @ApiProperty()
   surname: string;
 
-  @IsEmail()
+  @IsUUID()
   @ApiProperty()
-  email: string;
-
-  @IsString()
-  @ApiProperty()
-  cpf: string;
-
-  @IsString()
-  @IsOptional()
-  @ApiProperty()
-  cityId?: string;
+  cityId: string;
 }

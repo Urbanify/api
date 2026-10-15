@@ -30,7 +30,7 @@ model User {
   surname   String
   email     String   @unique
   password  String
-  cpf       String   @unique
+  cpf       String?  @unique
   cityId    String?  @db.Uuid
   role      UserRole @default(RESIDENT)
   createdAt DateTime @default(now())

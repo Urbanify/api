@@ -1,6 +1,8 @@
+import { CityRepository } from '@infra/database/prisma/repositories/city/city.repository';
 import { LoginCodeRepository } from '@infra/database/prisma/repositories/login-code/login-code.repository';
 import { UserRepository } from '@infra/database/prisma/repositories/user/user.repository';
 import { MailService } from '@infra/mail/mail.service';
+import { CityStatus } from '@modules/city/entities/city.entity';
 import {
   BadRequestException,
   ConflictException,
@@ -17,11 +19,12 @@ import { createHmac, randomInt, timingSafeEqual } from 'node:crypto';
 import { RequestOtpDto } from './dto/request-otp.dto';
 import { SignupDto } from './dto/signup.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
-import { UserRole } from './entities/user.entity';
+import { User, UserRole } from './entities/user.entity';
 
 const CODE_TTL_MS = 10 * 60 * 1000;
 const RESEND_INTERVAL_MS = 60 * 1000;
 const MAX_ATTEMPTS = 5;
+const SIGNUP_TOKEN_TTL = '30m';
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
@@ -33,25 +36,33 @@ function hashCode(email: string, code: string) {
     .digest('hex');
 }
 
+// Signup tokens use a different secret, so they never pass the login interceptors.
+function signupSecret() {
+  return `${env.jwtSecret}:signup`;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly loginCodeRepository: LoginCodeRepository,
+    private readonly cityRepository: CityRepository,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
   ) {}
 
   public async signup(signupDto: SignupDto) {
-    const cpf = signupDto.cpf;
+    let payload: { email: string };
 
-    const userWithCpf = await this.userRepository.findByCpf(cpf);
-
-    if (userWithCpf) {
-      throw new ConflictException(`user with cpf ${cpf} already exists`);
+    try {
+      payload = await this.jwtService.verifyAsync(signupDto.signupToken, {
+        secret: signupSecret(),
+      });
+    } catch {
+      throw new BadRequestException('invalid or expired signup');
     }
 
-    const email = normalizeEmail(signupDto.email);
+    const email = normalizeEmail(payload.email);
 
     const userWithEmail = await this.userRepository.findByEmail(email);
 
@@ -59,21 +70,31 @@ export class AuthService {
       throw new ConflictException(`user with email ${email} already exists`);
     }
 
+    const city = await this.cityRepository.findById(signupDto.cityId);
+
+    if (city?.status !== CityStatus.ACTIVE) {
+      throw new BadRequestException('invalid city');
+    }
+
     const now = new Date();
 
-    await this.userRepository.create({
+    const user: User = {
       id: UUIDGenerator.generate(),
       name: signupDto.name,
       surname: signupDto.surname,
       email,
       // ponytail: column kept for v2 schema compatibility, unused since OTP login
       password: await hash(UUIDGenerator.generate(), 10),
-      cpf: signupDto.cpf,
+      cpf: null,
       cityId: signupDto.cityId,
       role: UserRole.RESIDENT,
       createdAt: now,
       updatedAt: now,
-    });
+    };
+
+    await this.userRepository.create(user);
+
+    return { token: await this.signLoginToken(user) };
   }
 
   public async requestOtp(requestOtpDto: RequestOtpDto) {
@@ -91,13 +112,7 @@ export class AuthService {
       );
     }
 
-    const user = await this.userRepository.findByEmail(email);
-
-    // Unknown emails get the same response as known ones, so nothing is stored or sent.
-    if (!user) {
-      return { ok: true };
-    }
-
+    // Known and unknown emails get the same flow, so the response does not reveal which ones exist.
     const code = randomInt(0, 1_000_000).toString().padStart(6, '0');
 
     await this.loginCodeRepository.deleteByEmail(email);
@@ -153,13 +168,24 @@ Vale por 10 minutos. Se não foi você, ignore este e-mail.`,
 
     const user = await this.userRepository.findByEmail(email);
 
-    if (!user) {
-      throw invalidCode();
-    }
-
     await this.loginCodeRepository.deleteByEmail(email);
 
-    const payload = {
+    if (!user) {
+      const signupToken = await this.jwtService.signAsync(
+        { email, action: 'signup' },
+        { secret: signupSecret(), expiresIn: SIGNUP_TOKEN_TTL },
+      );
+
+      return { signupToken };
+    }
+
+    return {
+      token: await this.signLoginToken(user),
+    };
+  }
+
+  private signLoginToken(user: User) {
+    return this.jwtService.signAsync({
       user: {
         id: user.id,
         name: user.name,
@@ -167,12 +193,6 @@ Vale por 10 minutos. Se não foi você, ignore este e-mail.`,
         role: user.role,
         cityId: user.cityId,
       },
-    };
-
-    const token = await this.jwtService.signAsync(payload);
-
-    return {
-      token,
-    };
+    });
   }
 }

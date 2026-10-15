@@ -12,7 +12,7 @@ export class User {
   surname: string;
   email: string;
   password: string;
-  cpf: string;
+  cpf: string | null;
   cityId?: string;
   role: UserRole;
   createdAt: Date;

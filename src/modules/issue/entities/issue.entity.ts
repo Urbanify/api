@@ -109,7 +109,7 @@ export class Issue {
     name: string;
     surname: string;
     email: string;
-    cpf: string;
+    cpf: string | null;
     cityId?: string;
     role: UserRole;
     createdAt: Date;

@@ -43,20 +43,6 @@ export class UserRepository {
     return UserModelToEntityMapper.map(userModel);
   }
 
-  public async findByCpf(cpf: string): Promise<User | null> {
-    const userModel = await this.prismaService.user.findUnique({
-      where: {
-        cpf,
-      },
-    });
-
-    if (!userModel) {
-      return null;
-    }
-
-    return UserModelToEntityMapper.map(userModel);
-  }
-
   public async findByEmail(email: string): Promise<User | null> {
     const userModel = await this.prismaService.user.findUnique({
       where: {

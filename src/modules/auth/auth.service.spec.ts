@@ -1,6 +1,8 @@
+import { CityRepository } from '@infra/database/prisma/repositories/city/city.repository';
 import { LoginCodeRepository } from '@infra/database/prisma/repositories/login-code/login-code.repository';
 import { UserRepository } from '@infra/database/prisma/repositories/user/user.repository';
 import { MailService } from '@infra/mail/mail.service';
+import { City, CityStatus } from '@modules/city/entities/city.entity';
 import {
   BadRequestException,
   ConflictException,
@@ -19,11 +21,15 @@ jest.mock('@shared/env', () => ({
 }));
 
 const invalidCodeMessage = 'invalid or expired code';
+const invalidSignupMessage = 'invalid or expired signup';
+const cityId = '2a6a2b50-5e6b-4a5a-9c6e-9a0c321c4f01';
+const signupSecret = 'test-secret:signup';
 
 describe('AuthService', () => {
   let service: AuthService;
   let userRepository: UserRepository;
   let loginCodeRepository: LoginCodeRepository;
+  let cityRepository: CityRepository;
   let jwtService: JwtService;
   let mailService: MailService;
 
@@ -40,6 +46,15 @@ describe('AuthService', () => {
     updatedAt: new Date(),
   };
 
+  const activeCity = { id: cityId, status: CityStatus.ACTIVE } as City;
+
+  const signupInput: SignupDto = {
+    signupToken: '',
+    name: 'Ana',
+    surname: 'Silva',
+    cityId,
+  };
+
   function loginCodeRecord(overrides: Partial<LoginCode> = {}): LoginCode {
     return {
       id: 'login-code-id',
@@ -52,17 +67,22 @@ describe('AuthService', () => {
     };
   }
 
-  // Requests a code for the user and reads it back from the email, as the user would.
-  async function requestCode() {
-    jest.spyOn(userRepository, 'findByEmail').mockResolvedValueOnce(user);
-
-    const result = await service.requestOtp({ email: user.email });
+  // Requests a code and reads it back from the email, as the user would.
+  async function requestCode(email = user.email) {
+    const result = await service.requestOtp({ email });
 
     const { text } = (mailService.send as jest.Mock).mock.calls[0][0];
     const code = text.match(/\b\d{6}\b/)[0];
     const stored = (loginCodeRepository.create as jest.Mock).mock.calls[0][0];
 
     return { result, code, stored };
+  }
+
+  function signupTokenFor(email: string) {
+    return jwtService.signAsync(
+      { email, action: 'signup' },
+      { secret: signupSecret, expiresIn: '30m' },
+    );
   }
 
   beforeEach(async () => {
@@ -73,7 +93,6 @@ describe('AuthService', () => {
           provide: UserRepository,
           useValue: {
             create: jest.fn().mockResolvedValue(null),
-            findByCpf: jest.fn().mockResolvedValue(null),
             findByEmail: jest.fn().mockResolvedValue(null),
           },
         },
@@ -87,10 +106,14 @@ describe('AuthService', () => {
           },
         },
         {
-          provide: JwtService,
+          provide: CityRepository,
           useValue: {
-            signAsync: jest.fn().mockResolvedValue('token'),
+            findById: jest.fn().mockResolvedValue(null),
           },
+        },
+        {
+          provide: JwtService,
+          useValue: new JwtService({ secret: 'test-secret' }),
         },
         {
           provide: MailService,
@@ -104,8 +127,11 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
     userRepository = module.get<UserRepository>(UserRepository);
     loginCodeRepository = module.get<LoginCodeRepository>(LoginCodeRepository);
+    cityRepository = module.get<CityRepository>(CityRepository);
     jwtService = module.get<JwtService>(JwtService);
     mailService = module.get<MailService>(MailService);
+
+    jest.spyOn(jwtService, 'signAsync');
   });
 
   it('should be defined', () => {
@@ -115,88 +141,124 @@ describe('AuthService', () => {
   });
 
   describe('signup', () => {
-    it('should signup an user', async () => {
-      const signupInput: SignupDto = {
-        name: 'John',
-        surname: 'Doe',
-        email: 'john@doe.com',
-        cpf: '12345678910',
-        cityId: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
-      };
+    it('should create a resident with no cpf and a lowercased email from the signup token', async () => {
+      const signupToken = await signupTokenFor('Ana@Silva.com');
 
-      await service.signup(signupInput);
+      jest.spyOn(cityRepository, 'findById').mockResolvedValueOnce(activeCity);
+
+      await service.signup({ ...signupInput, signupToken });
 
       expect(userRepository.create).toHaveBeenCalledTimes(1);
       expect(userRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
+          name: 'Ana',
+          surname: 'Silva',
+          email: 'ana@silva.com',
+          cpf: null,
+          cityId,
+          role: UserRole.RESIDENT,
           password: expect.stringMatching(/^\$2b\$10\$/),
         }),
       );
     });
 
-    it('should always create the user as a resident, ignoring any role in the body', async () => {
-      const signupInput = {
-        name: 'John',
-        surname: 'Doe',
-        email: 'john@doe.com',
-        cpf: '12345678910',
-        cityId: 'b6281bf4-bb46-490f-b59d-6db9e89f8ca8',
-        role: UserRole.OWNER,
-      } as SignupDto;
+    it('should return a login token for the new resident', async () => {
+      const signupToken = await signupTokenFor('ana@silva.com');
 
-      await service.signup(signupInput);
+      jest.spyOn(cityRepository, 'findById').mockResolvedValueOnce(activeCity);
 
-      expect(userRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({ role: UserRole.RESIDENT }),
+      const result = await service.signup({ ...signupInput, signupToken });
+
+      expect(result).toEqual({ token: expect.any(String) });
+
+      const payload = await jwtService.verifyAsync(result.token, {
+        secret: 'test-secret',
+      });
+
+      expect(payload.user).toEqual(
+        expect.objectContaining({
+          name: 'Ana',
+          surname: 'Silva',
+          role: UserRole.RESIDENT,
+          cityId,
+        }),
       );
     });
 
-    it('should throw a conflict exception with cpf', async () => {
-      const conflictException = new ConflictException(
-        `user with cpf ${user.cpf} already exists`,
-      );
+    it('should reject a login token, which is signed with another secret', async () => {
+      const loginToken = await jwtService.signAsync({
+        user: { id: user.id, role: UserRole.ADMIN },
+      });
 
-      jest.spyOn(userRepository, 'findByCpf').mockResolvedValueOnce(user);
+      jest.spyOn(cityRepository, 'findById').mockResolvedValueOnce(activeCity);
 
-      const signupInput: SignupDto = {
-        ...user,
-      };
+      await expect(
+        service.signup({ ...signupInput, signupToken: loginToken }),
+      ).rejects.toThrow(new BadRequestException(invalidSignupMessage));
 
-      await expect(service.signup(signupInput)).rejects.toEqual(
-        conflictException,
-      );
+      expect(userRepository.create).not.toHaveBeenCalled();
     });
 
-    it('should throw a conflict exception with email', async () => {
-      const conflictException = new ConflictException(
-        `user with email ${user.email} already exists`,
-      );
+    it('should throw a conflict exception when the email already has an account', async () => {
+      const signupToken = await signupTokenFor(user.email);
 
       jest.spyOn(userRepository, 'findByEmail').mockResolvedValueOnce(user);
 
-      const signupInput: SignupDto = {
-        ...user,
-      };
-
-      await expect(service.signup(signupInput)).rejects.toEqual(
-        conflictException,
+      await expect(
+        service.signup({ ...signupInput, signupToken }),
+      ).rejects.toThrow(
+        new ConflictException(`user with email ${user.email} already exists`),
       );
+
+      expect(userRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('should reject an unknown city', async () => {
+      const signupToken = await signupTokenFor('ana@silva.com');
+
+      await expect(
+        service.signup({ ...signupInput, signupToken }),
+      ).rejects.toThrow(new BadRequestException('invalid city'));
+
+      expect(userRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('should reject an inactive city', async () => {
+      const signupToken = await signupTokenFor('ana@silva.com');
+
+      jest
+        .spyOn(cityRepository, 'findById')
+        .mockResolvedValueOnce({ ...activeCity, status: CityStatus.DISABLED });
+
+      await expect(
+        service.signup({ ...signupInput, signupToken }),
+      ).rejects.toThrow(new BadRequestException('invalid city'));
+
+      expect(userRepository.create).not.toHaveBeenCalled();
     });
   });
 
   describe('request otp', () => {
-    it('should return ok and send nothing for an unknown email', async () => {
-      const result = await service.requestOtp({ email: 'nobody@doe.com' });
+    it('should store a code and send it for an unknown email', async () => {
+      const { result, code, stored } = await requestCode('nobody@doe.com');
 
       expect(result).toEqual({ ok: true });
-      expect(loginCodeRepository.create).not.toHaveBeenCalled();
-      expect(mailService.send).not.toHaveBeenCalled();
+      expect(code).toMatch(/^\d{6}$/);
+      expect(stored.email).toBe('nobody@doe.com');
+      expect(mailService.send).toHaveBeenCalledWith(
+        expect.objectContaining({ to: 'nobody@doe.com' }),
+      );
     });
 
-    it('should normalize the email before looking it up', async () => {
+    it('should normalize the email before storing the code', async () => {
       await service.requestOtp({ email: '  John@Doe.com ' });
 
-      expect(userRepository.findByEmail).toHaveBeenCalledWith('john@doe.com');
+      expect(loginCodeRepository.findLatestByEmail).toHaveBeenCalledWith(
+        'john@doe.com',
+      );
+      expect(loginCodeRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({ email: 'john@doe.com' }),
+      );
     });
 
     it('should throw too many requests when a code was requested less than 60 seconds ago', async () => {
@@ -240,7 +302,7 @@ describe('AuthService', () => {
   });
 
   describe('verify otp', () => {
-    it('should return a token and delete the codes when the code is right', async () => {
+    it('should return a login token and delete the codes when the code is right', async () => {
       const { code, stored } = await requestCode();
 
       jest
@@ -250,19 +312,45 @@ describe('AuthService', () => {
 
       const result = await service.verifyOtp({ email: user.email, code });
 
-      expect(result).toEqual({ token: 'token' });
+      expect(result).toEqual({ token: expect.any(String) });
       expect(loginCodeRepository.deleteByEmail).toHaveBeenLastCalledWith(
         user.email,
       );
-      expect(jwtService.signAsync).toHaveBeenCalledWith({
-        user: {
-          id: user.id,
-          name: user.name,
-          surname: user.surname,
-          role: user.role,
-          cityId: user.cityId,
-        },
+
+      const payload = await jwtService.verifyAsync(result.token, {
+        secret: 'test-secret',
       });
+
+      expect(payload.user).toEqual({
+        id: user.id,
+        name: user.name,
+        surname: user.surname,
+        role: user.role,
+        cityId: user.cityId,
+      });
+    });
+
+    it('should return a signup token when the code is right and the email has no account', async () => {
+      const email = 'novo@urbanify.com.br';
+      const { code, stored } = await requestCode(email);
+
+      jest
+        .spyOn(loginCodeRepository, 'findLatestByEmail')
+        .mockResolvedValueOnce(loginCodeRecord(stored));
+
+      const result = await service.verifyOtp({ email, code });
+
+      expect(result).toEqual({ signupToken: expect.any(String) });
+      expect(loginCodeRepository.deleteByEmail).toHaveBeenLastCalledWith(email);
+
+      const payload = await jwtService.verifyAsync(result.signupToken, {
+        secret: signupSecret,
+      });
+
+      expect(payload).toMatchObject({ email, action: 'signup' });
+      await expect(
+        jwtService.verifyAsync(result.signupToken, { secret: 'test-secret' }),
+      ).rejects.toThrow();
     });
 
     it('should reject a wrong code and count the attempt', async () => {
@@ -325,20 +413,6 @@ describe('AuthService', () => {
     it('should reject when no code was requested', async () => {
       await expect(
         service.verifyOtp({ email: user.email, code: '123456' }),
-      ).rejects.toThrow(new BadRequestException(invalidCodeMessage));
-
-      expect(jwtService.signAsync).not.toHaveBeenCalled();
-    });
-
-    it('should reject the right code when the user no longer exists', async () => {
-      const { code, stored } = await requestCode();
-
-      jest
-        .spyOn(loginCodeRepository, 'findLatestByEmail')
-        .mockResolvedValueOnce(loginCodeRecord(stored));
-
-      await expect(
-        service.verifyOtp({ email: user.email, code }),
       ).rejects.toThrow(new BadRequestException(invalidCodeMessage));
 
       expect(jwtService.signAsync).not.toHaveBeenCalled();

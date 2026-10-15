@@ -1,26 +1,27 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { AuthService } from './auth.service';
 import { RequestOtpDto } from './dto/request-otp.dto';
 import { SignupDto } from './dto/signup.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
-import { SignupValidationInterceptor } from './interceptors/signup.interceptor';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/signup')
-  @ApiOperation({ summary: 'Signup an user' })
-  @UseInterceptors(SignupValidationInterceptor)
+  @ApiOperation({
+    summary: 'Create a resident account from the signup token of a new email',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid or expired signup token, or inactive city',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'An account with this email already exists',
+  })
   signup(@Body() signupDto: SignupDto) {
     return this.authService.signup(signupDto);
   }
@@ -38,7 +39,10 @@ export class AuthController {
 
   @Post('/otp/verify')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Exchange a one-time login code for a token' })
+  @ApiOperation({
+    summary:
+      'Exchange a one-time code for a login token, or for a signup token when the email has no account',
+  })
   verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
     return this.authService.verifyOtp(verifyOtpDto);
   }

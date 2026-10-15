@@ -73,7 +73,7 @@ export class CityModelToEntityMapper {
       surname: string;
       email: string;
       password: string;
-      cpf: string;
+      cpf: string | null;
       role: PrismaUserRole;
     };
     comments?: {

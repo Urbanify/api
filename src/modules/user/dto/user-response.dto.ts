@@ -14,8 +14,8 @@ export class UserResponseDto {
   @ApiProperty()
   email: string;
 
-  @ApiProperty()
-  cpf: string;
+  @ApiProperty({ nullable: true })
+  cpf: string | null;
 
   @ApiProperty({ required: false })
   cityId?: string;
