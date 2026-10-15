@@ -1,7 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
-
-import { UserRole } from '../entities/user.entity';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class SignupDto {
   @IsString()
@@ -18,18 +16,10 @@ export class SignupDto {
 
   @IsString()
   @ApiProperty()
-  password: string;
-
-  @IsString()
-  @ApiProperty()
   cpf: string;
 
   @IsString()
   @IsOptional()
   @ApiProperty()
   cityId?: string;
-
-  @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
 }

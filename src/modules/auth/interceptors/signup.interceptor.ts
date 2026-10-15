@@ -5,10 +5,7 @@ import {
   NestInterceptor,
   UnauthorizedException,
 } from '@nestjs/common';
-import { env } from '@shared/env';
 import { Observable } from 'rxjs';
-
-import { UserRole } from '../entities/user.entity';
 
 @Injectable()
 export class SignupValidationInterceptor implements NestInterceptor {
@@ -20,22 +17,10 @@ export class SignupValidationInterceptor implements NestInterceptor {
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
 
-    const { role, cityId } = request?.body;
+    const { cityId } = request?.body;
 
-    if (!cityId && role !== UserRole.ADMIN) {
+    if (!cityId) {
       throw new UnauthorizedException();
-    }
-
-    if (role === UserRole.ADMIN) {
-      const apiKey = request?.headers['api-key'];
-
-      if (!apiKey) {
-        throw new UnauthorizedException();
-      }
-
-      if (apiKey !== env.apiKey) {
-        throw new UnauthorizedException();
-      }
     }
 
     return next.handle();

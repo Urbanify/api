@@ -7,17 +7,11 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ActiveUser, UserType } from '@shared/decorators/active-user.decorator';
 
 import { AuthService } from './auth.service';
-import {
-  ForgotPasswordDto,
-  ForgotPasswordResponseDto,
-} from './dto/forgot-password.dto';
-import { SigninDto } from './dto/signin.dto';
+import { RequestOtpDto } from './dto/request-otp.dto';
 import { SignupDto } from './dto/signup.dto';
-import { UpdatePasswordDto } from './dto/update-password.dto';
-import { ForgotPasswordValidationInterceptor } from './interceptors/forgot-password.interceptor';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { SignupValidationInterceptor } from './interceptors/signup.interceptor';
 
 @Controller('auth')
@@ -31,27 +25,21 @@ export class AuthController {
     return this.authService.signup(signupDto);
   }
 
-  @Post('/signin')
-  @ApiOperation({ summary: 'Signin an user' })
-  signin(@Body() signinDto: SigninDto) {
-    return this.authService.signin(signinDto);
-  }
-
-  @Post('/forgot-password')
-  @ApiOperation({ summary: 'Reset an user password' })
+  @Post('/otp/request')
   @HttpCode(HttpStatus.OK)
-  @ApiResponse({ type: ForgotPasswordResponseDto })
-  forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(forgotPasswordDto);
+  @ApiOperation({ summary: 'Send a one-time login code to an email' })
+  @ApiResponse({
+    status: HttpStatus.TOO_MANY_REQUESTS,
+    description: 'A code was requested less than 60 seconds ago',
+  })
+  requestOtp(@Body() requestOtpDto: RequestOtpDto) {
+    return this.authService.requestOtp(requestOtpDto);
   }
 
-  @Post('/update-password')
-  @ApiOperation({ summary: 'Update the user password' })
-  @UseInterceptors(ForgotPasswordValidationInterceptor)
-  updatePassword(
-    @Body() updatePassword: UpdatePasswordDto,
-    @ActiveUser() user: UserType,
-  ) {
-    return this.authService.updatePassword(user, updatePassword);
+  @Post('/otp/verify')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Exchange a one-time login code for a token' })
+  verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
+    return this.authService.verifyOtp(verifyOtpDto);
   }
 }

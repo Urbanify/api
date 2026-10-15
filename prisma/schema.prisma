@@ -323,3 +323,15 @@ model Building {
 
   @@map("buildings")
 }
+
+model LoginCode {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@map("login_codes")
+}
