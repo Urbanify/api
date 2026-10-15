@@ -1,5 +1,5 @@
 import { UserRepository } from '@infra/database/prisma/repositories/user/user.repository';
-import { Templates, TokenAction } from '@infra/mail/mail.dto';
+import { TokenAction } from '@infra/mail/mail.dto';
 import { MailService } from '@infra/mail/mail.service';
 import {
   BadRequestException,
@@ -119,11 +119,13 @@ export class AuthService {
 
     await this.mailService.send({
       to: user.email,
-      subject: 'email de teste',
-      template: Templates.FORGOT_PASSWORD,
-      payload: {
-        link: frontendForgotPasswordUrl,
-      },
+      subject: 'Redefinição de senha da Urbanify',
+      html: `<p>Para redefinir sua senha da Urbanify, acesse o link abaixo:</p><p><a href="${frontendForgotPasswordUrl}">${frontendForgotPasswordUrl}</a></p><p>O link vale por 24 horas.</p>`,
+      text: `Para redefinir sua senha da Urbanify, acesse o link abaixo:
+
+${frontendForgotPasswordUrl}
+
+O link vale por 24 horas.`,
     });
 
     return {

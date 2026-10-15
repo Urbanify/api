@@ -1,13 +1,37 @@
 import { Injectable } from '@nestjs/common';
+import { env } from '@shared/env';
 
 import { SendMailDto } from './mail.dto';
-import { MailgunService } from './mailgun/mailgun.service';
 
 @Injectable()
 export class MailService {
-  constructor(private readonly mailgunService: MailgunService) {}
-
   public async send(input: SendMailDto): Promise<void> {
-    return this.mailgunService.send(input);
+    if (!env.resendApiKey) {
+      console.warn(
+        `[mail] RESEND_API_KEY not set, email to ${input.to} not sent`,
+      );
+      return;
+    }
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: env.mailServiceFrom,
+        to: [input.to],
+        subject: input.subject,
+        html: input.html,
+        text: input.text,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Resend responded ${response.status}: ${await response.text()}`,
+      );
+    }
   }
 }

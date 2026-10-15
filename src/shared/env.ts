@@ -15,10 +15,7 @@ class Env {
   apiKey: string;
 
   @IsString()
-  mailgunKey: string;
-
-  @IsString()
-  mailgunUrl: string;
+  resendApiKey: string;
 
   @IsString()
   mailServiceFrom: string;
@@ -32,9 +29,9 @@ export const env: Env = plainToInstance(Env, {
   jwtSecret: process.env.JWT_SECRET,
   databaseUrl: process.env.DATABASE_URL,
   apiKey: process.env.API_KEY,
-  mailgunKey: process.env.MAILGUN_KEY,
-  mailgunUrl: process.env.MAILGUN_URL,
-  mailServiceFrom: process.env.MAIL_SERVICE_FROM,
+  resendApiKey: process.env.RESEND_API_KEY ?? '',
+  mailServiceFrom:
+    process.env.MAIL_SERVICE_FROM ?? 'Urbanify <noreply@urbanify.com.br>',
   frontendUrl: process.env.FRONTEND_URL,
 });
 

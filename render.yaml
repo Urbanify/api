@@ -23,11 +23,9 @@ services:
         generateValue: true
       - key: API_KEY
         generateValue: true
-      # Email is off in staging: the client starts with these placeholders and sending fails silently.
-      - key: MAILGUN_KEY
-        value: disabled
-      - key: MAILGUN_URL
-        value: disabled.invalid
+      # Resend API key for outgoing email. If left empty, emails are skipped with a warning in the logs.
+      - key: RESEND_API_KEY
+        sync: false
       - key: MAIL_SERVICE_FROM
         value: Urbanify <noreply@urbanify.com.br>
       - key: FRONTEND_URL
