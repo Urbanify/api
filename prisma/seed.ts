@@ -7,6 +7,7 @@ import type {
 } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcrypt';
+import { createHash } from 'node:crypto';
 
 // Demo seed for the staging environment: the city of Aracaju (SE) with
 // issues at every stage of the workflow. It is idempotent and resets the
@@ -331,8 +332,13 @@ const ISSUES: [
   ],
 ];
 
-const issueId = (suffix: string) =>
-  `a0a0a0a0-0000-4000-8000-0000000000${suffix}`;
+// Stable ids that still look distinct on screen (the UI shows the first characters).
+const issueId = (suffix: string) => {
+  const h = createHash('md5')
+    .update(`urbanify-demo-issue-${suffix}`)
+    .digest('hex');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
+};
 const fullName = (u: { name: string; surname: string }) =>
   `${u.name} ${u.surname}`;
 
@@ -475,6 +481,7 @@ async function main() {
         action: h.action,
         description: h.description,
         createdAt: new Date(createdAt.getTime() + i * 5 * hour),
+        updatedAt: new Date(createdAt.getTime() + i * 5 * hour),
       })),
     });
 
