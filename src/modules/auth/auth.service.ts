@@ -51,7 +51,7 @@ export class AuthService {
       throw new ConflictException(`user with cpf ${cpf} already exists`);
     }
 
-    const email = signupDto.email;
+    const email = normalizeEmail(signupDto.email);
 
     const userWithEmail = await this.userRepository.findByEmail(email);
 
@@ -65,7 +65,7 @@ export class AuthService {
       id: UUIDGenerator.generate(),
       name: signupDto.name,
       surname: signupDto.surname,
-      email: signupDto.email,
+      email,
       // ponytail: column kept for v2 schema compatibility, unused since OTP login
       password: await hash(UUIDGenerator.generate(), 10),
       cpf: signupDto.cpf,
