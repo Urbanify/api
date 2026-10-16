@@ -30,3 +30,6 @@ services:
         value: Urbanify <noreply@urbanify.com.br>
       - key: FRONTEND_URL
         value: https://stg.urbanify.com.br/update-password
+      # Apps Script web app URL that appends leads to the internal sheet. If left empty, rows are skipped.
+      - key: SHEETS_WEBHOOK_URL
+        sync: false

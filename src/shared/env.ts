@@ -1,5 +1,5 @@
 import { plainToInstance } from 'class-transformer';
-import { IsString, validateSync } from 'class-validator';
+import { IsOptional, IsString, validateSync } from 'class-validator';
 
 class Env {
   @IsString()
@@ -22,6 +22,10 @@ class Env {
 
   @IsString()
   frontendUrl: string;
+
+  @IsOptional()
+  @IsString()
+  sheetsWebhookUrl?: string;
 }
 
 export const env: Env = plainToInstance(Env, {
@@ -33,6 +37,7 @@ export const env: Env = plainToInstance(Env, {
   mailServiceFrom:
     process.env.MAIL_SERVICE_FROM ?? 'Urbanify <noreply@urbanify.com.br>',
   frontendUrl: process.env.FRONTEND_URL,
+  sheetsWebhookUrl: process.env.SHEETS_WEBHOOK_URL,
 });
 
 const errors = validateSync(env);

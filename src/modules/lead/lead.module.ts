@@ -3,10 +3,11 @@ import { Module } from '@nestjs/common';
 
 import { LeadController } from './lead.controller';
 import { LeadService } from './lead.service';
+import { SheetsService } from './sheets.service';
 
 @Module({
   imports: [MailModule],
   controllers: [LeadController],
-  providers: [LeadService],
+  providers: [LeadService, SheetsService],
 })
 export class LeadModule {}
