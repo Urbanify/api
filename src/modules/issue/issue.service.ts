@@ -71,8 +71,10 @@ export class IssueService {
   }
 
   public async create(userType: UserType, createIssueDto: CreateIssueDto) {
+    const id = UUIDGenerator.generate();
+
     await this.issueRepository.create({
-      id: UUIDGenerator.generate(),
+      id,
       status: IssueStatus.WAITING_FOR_FISCAL,
       cityId: userType.cityId,
       latitude: createIssueDto.latitude,
@@ -95,6 +97,9 @@ export class IssueService {
       ],
       photos: createIssueDto.photos,
     });
+
+    // The app shows the protocol and opens the new issue right away.
+    return { id };
   }
 
   public async list(userType: UserType, filter: ListIssuesFilterDto) {
