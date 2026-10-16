@@ -39,7 +39,7 @@ describe('LeadService', () => {
   });
 
   it('sends one email to the sales inbox with the answers and the candidate as reply-to', async () => {
-    await service.submitResellerLead(validLead, '1.1.1.1');
+    await service.submitResellerLead(validLead);
 
     expect(mailService.send).toHaveBeenCalledTimes(1);
     expect(mailService.send).toHaveBeenCalledWith(
@@ -52,14 +52,11 @@ describe('LeadService', () => {
   });
 
   it('escapes HTML in every answer', async () => {
-    await service.submitResellerLead(
-      {
-        ...validLead,
-        name: '<img src=x onerror=alert(1)>',
-        message: '"a" & <b>',
-      },
-      '1.1.1.1',
-    );
+    await service.submitResellerLead({
+      ...validLead,
+      name: '<img src=x onerror=alert(1)>',
+      message: '"a" & <b>',
+    });
 
     const { html, text } = (mailService.send as jest.Mock).mock.calls[0][0];
     expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
@@ -69,20 +66,17 @@ describe('LeadService', () => {
   });
 
   it('does nothing when the honeypot is filled', async () => {
-    await service.submitResellerLead(
-      { ...validLead, website: 'http://spam.example' },
-      '1.1.1.1',
-    );
+    await service.submitResellerLead({
+      ...validLead,
+      website: 'http://spam.example',
+    });
 
     expect(mailService.send).not.toHaveBeenCalled();
   });
 
   it('rejects a CNPJ with wrong check digits and sends nothing', async () => {
     await expect(
-      service.submitResellerLead(
-        { ...validLead, cnpj: '11222333000182' },
-        '1.1.1.1',
-      ),
+      service.submitResellerLead({ ...validLead, cnpj: '11222333000182' }),
     ).rejects.toThrow(BadRequestException);
 
     expect(mailService.send).not.toHaveBeenCalled();

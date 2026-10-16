@@ -7,16 +7,17 @@ function checkDigit(digits: number[], weights: number[]): number {
   return rest < 2 ? 0 : 11 - rest;
 }
 
-// Checks the two verifier digits of a 14-digit CNPJ. Repeated digits (00000000000000)
-// pass the arithmetic, so they are rejected explicitly.
+// Since July 2026 the Receita also issues alphanumeric CNPJs: the first 12 characters may be
+// A-Z, and each character counts as its ASCII code minus 48, so digits keep their value.
+// Repeated characters (00000000000000) pass the arithmetic, so they are rejected explicitly.
 export function isValidCnpj(value: string): boolean {
-  if (!/^\d{14}$/.test(value) || /^(\d)\1{13}$/.test(value)) {
+  if (!/^[A-Z0-9]{12}\d{2}$/.test(value) || /^(.)\1{13}$/.test(value)) {
     return false;
   }
 
-  const digits = value.split('').map(Number);
-  const first = checkDigit(digits, FIRST_WEIGHTS);
-  const second = checkDigit([...digits.slice(0, 12), first], SECOND_WEIGHTS);
+  const values = [...value].map((char) => char.charCodeAt(0) - 48);
+  const first = checkDigit(values, FIRST_WEIGHTS);
+  const second = checkDigit([...values.slice(0, 12), first], SECOND_WEIGHTS);
 
-  return digits[12] === first && digits[13] === second;
+  return values[12] === first && values[13] === second;
 }

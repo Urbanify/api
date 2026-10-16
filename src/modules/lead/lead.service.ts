@@ -54,15 +54,13 @@ export class LeadService {
 
   constructor(private readonly mailService: MailService) {}
 
-  async submitResellerLead(
-    dto: CreateResellerLeadDto,
-    ip: string,
-  ): Promise<void> {
+  async submitResellerLead(dto: CreateResellerLeadDto): Promise<void> {
     if (dto.website) {
       return;
     }
 
-    this.consumeRateLimit(ip);
+    // Keyed by e-mail: every request arrives from the web server, so the client IP is not useful.
+    this.consumeRateLimit(dto.email.trim().toLowerCase());
 
     if (!isValidCnpj(dto.cnpj)) {
       throw new BadRequestException('invalid cnpj');
@@ -84,12 +82,12 @@ export class LeadService {
     });
   }
 
-  private consumeRateLimit(ip: string): void {
+  private consumeRateLimit(key: string): void {
     const now = Date.now();
-    const hit = this.hits.get(ip);
+    const hit = this.hits.get(key);
 
     if (!hit || hit.resetAt <= now) {
-      this.hits.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+      this.hits.set(key, { count: 1, resetAt: now + RATE_WINDOW_MS });
       return;
     }
 

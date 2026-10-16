@@ -37,8 +37,11 @@ export class CreateResellerLeadDto {
   @ApiProperty({ description: 'Razão social' })
   company: string;
 
-  @Matches(/^\d{14}$/)
-  @ApiProperty({ description: 'Digits only' })
+  @Matches(/^[A-Z0-9]{12}\d{2}$/)
+  @ApiProperty({
+    description:
+      'Without punctuation; letters allowed in the first 12 characters',
+  })
   cnpj: string;
 
   @IsString()
