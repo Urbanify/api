@@ -19,4 +19,11 @@ describe('isValidCnpj', () => {
     expect(isValidCnpj('11.222.333/0001-81')).toBe(false);
     expect(isValidCnpj('')).toBe(false);
   });
+  it('accepts an alphanumeric CNPJ', () => {
+    expect(isValidCnpj('12ABC34501DE35')).toBe(true);
+  });
+
+  it('rejects letters in the check digits', () => {
+    expect(isValidCnpj('12ABC34501DEAB')).toBe(false);
+  });
 });
