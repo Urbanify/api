@@ -82,17 +82,20 @@ describe('LeadService', () => {
     expect(mailService.send).not.toHaveBeenCalled();
   });
 
-  it('allows 5 applications per IP per hour and then answers 429', async () => {
+  it('allows 5 applications per e-mail per hour and then answers 429', async () => {
     for (let i = 0; i < 5; i++) {
-      await service.submitResellerLead(validLead, '2.2.2.2');
+      await service.submitResellerLead(validLead);
     }
 
-    await expect(
-      service.submitResellerLead(validLead, '2.2.2.2'),
-    ).rejects.toThrow(HttpException);
+    await expect(service.submitResellerLead(validLead)).rejects.toThrow(
+      HttpException,
+    );
     expect(mailService.send).toHaveBeenCalledTimes(5);
 
-    await service.submitResellerLead(validLead, '3.3.3.3');
+    await service.submitResellerLead({
+      ...validLead,
+      email: 'outro@example.com',
+    });
     expect(mailService.send).toHaveBeenCalledTimes(6);
   });
 });
