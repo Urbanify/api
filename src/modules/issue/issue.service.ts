@@ -1,5 +1,6 @@
 import { IssueRepository } from '@infra/database/prisma/repositories/issue/issue.repository';
 import { UserRole } from '@modules/auth/entities/user.entity';
+import { PushMessage, PushService } from '@modules/push/push.service';
 import {
   BadRequestException,
   Injectable,
@@ -18,9 +19,56 @@ import { ResolutionIssueDto } from './dto/resolution-issue.dto';
 import { SolveIssueDto } from './dto/solve-issue.dto';
 import { IssueHistoryAction, IssueStatus } from './entities/issue.entity';
 
+const REPORTER_MESSAGES = {
+  assigned: {
+    title: 'Alguém foi verificar',
+    body: 'Seu relato está sendo verificado.',
+  },
+  accepted: {
+    title: 'Seu relato foi confirmado e enviado para a prefeitura',
+    body: 'Acompanhe o chamado no app.',
+  },
+  managerAssigned: {
+    title: 'A prefeitura começou a resolver',
+    body: 'Acompanhe o chamado no app.',
+  },
+  resolved: {
+    title: 'A prefeitura informou que resolveu. Confirme',
+    body: 'Abra o chamado e confirme se o problema foi resolvido.',
+  },
+} satisfies Record<string, PushMessage>;
+
+const FISCAL_MESSAGES = {
+  resolved: {
+    title: 'Solução para confirmar',
+    body: 'Um chamado que você verificou tem solução para confirmar.',
+  },
+} satisfies Record<string, PushMessage>;
+
 @Injectable()
 export class IssueService {
-  constructor(private readonly issueRepository: IssueRepository) {}
+  constructor(
+    private readonly issueRepository: IssueRepository,
+    private readonly pushService: PushService,
+  ) {}
+
+  // Fire-and-forget: sendToUsers never throws, so a push failure cannot fail the status change.
+  // The actor is never notified about their own action.
+  private notify(
+    recipientId: string | undefined,
+    actorId: string,
+    issueId: string,
+    message: PushMessage,
+  ) {
+    if (!recipientId || recipientId === actorId) {
+      return;
+    }
+
+    void this.pushService.sendToUsers([recipientId], {
+      ...message,
+      data: { issueId },
+    });
+  }
 
   public async create(userType: UserType, createIssueDto: CreateIssueDto) {
     await this.issueRepository.create({
@@ -151,6 +199,19 @@ export class IssueService {
     }
 
     await this.issueRepository.update(issue);
+
+    if (userRole === UserRole.RESIDENT) {
+      this.notify(issue.reporterId, userId, id, REPORTER_MESSAGES.assigned);
+    }
+
+    if (userRole === UserRole.MANAGER) {
+      this.notify(
+        issue.reporterId,
+        userId,
+        id,
+        REPORTER_MESSAGES.managerAssigned,
+      );
+    }
   }
 
   public async close(
@@ -245,6 +306,8 @@ export class IssueService {
     });
 
     await this.issueRepository.update(issue);
+
+    this.notify(issue.reporterId, userId, id, REPORTER_MESSAGES.accepted);
   }
 
   public async resolution(
@@ -285,6 +348,9 @@ export class IssueService {
     });
 
     await this.issueRepository.update(issue);
+
+    this.notify(issue.reporterId, userId, id, REPORTER_MESSAGES.resolved);
+    this.notify(issue.fiscalId, userId, id, FISCAL_MESSAGES.resolved);
   }
 
   public async solve(

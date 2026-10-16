@@ -41,6 +41,7 @@ model User {
   issuesManaged  Issue[]        @relation("manager")
   issueHistory   IssueHistory[]
   comments       Comment[]
+  deviceTokens   DeviceToken[]
   city           City?          @relation(fields: [cityId], references: [id], onDelete: SetNull)
 
   @@map("users")
@@ -368,4 +369,25 @@ model CityPlace {
 
   @@index([cityId, published])
   @@map("city_places")
+}
+
+enum DevicePlatform {
+  ios
+  android
+
+  @@map("device_platform")
+}
+
+model DeviceToken {
+  id         String         @id @default(uuid()) @db.Uuid
+  userId     String         @db.Uuid
+  token      String         @unique
+  platform   DevicePlatform
+  createdAt  DateTime       @default(now())
+  lastSeenAt DateTime       @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("device_tokens")
 }

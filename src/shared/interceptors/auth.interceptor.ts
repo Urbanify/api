@@ -1,3 +1,4 @@
+import { UserRole } from '@modules/auth/entities/user.entity';
 import {
   CallHandler,
   ExecutionContext,
@@ -9,7 +10,6 @@ import { JwtService } from '@nestjs/jwt';
 import { env } from '@shared/env';
 import { extractTokenFromHeader } from '@shared/extract-token';
 import { Observable } from 'rxjs';
-import { UserRole } from 'src/modules/auth/entities/user.entity';
 
 @Injectable()
 export class AuthValidationInterceptor implements NestInterceptor {

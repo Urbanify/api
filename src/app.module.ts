@@ -13,6 +13,7 @@ import { FeatureFlagModule } from './modules/feature-flag/feature-flag.module';
 import { IssueModule } from './modules/issue/issue.module';
 import { LeadModule } from './modules/lead/lead.module';
 import { PlaceModule } from './modules/place/place.module';
+import { PushModule } from './modules/push/push.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -31,6 +32,7 @@ import { UserModule } from './modules/user/user.module';
     BuildingModule,
     PlaceModule,
     LeadModule,
+    PushModule,
   ],
   controllers: [AppController],
   providers: [AppService],

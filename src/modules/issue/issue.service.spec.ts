@@ -1,5 +1,6 @@
 import { IssueRepository } from '@infra/database/prisma/repositories/issue/issue.repository';
 import { UserRole } from '@modules/auth/entities/user.entity';
+import { PushService } from '@modules/push/push.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserType } from '@shared/decorators/active-user.decorator';
@@ -24,11 +25,16 @@ import { IssueService } from './issue.service';
 describe('IssueService', () => {
   let service: IssueService;
   let issueRepository: IssueRepository;
+  let pushService: PushService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         IssueService,
+        {
+          provide: PushService,
+          useValue: { sendToUsers: jest.fn().mockResolvedValue(0) },
+        },
         {
           provide: IssueRepository,
           useValue: {
@@ -45,6 +51,7 @@ describe('IssueService', () => {
 
     service = module.get<IssueService>(IssueService);
     issueRepository = module.get<IssueRepository>(IssueRepository);
+    pushService = module.get<PushService>(PushService);
   });
 
   it('should be defined', () => {
@@ -1675,6 +1682,168 @@ describe('IssueService', () => {
 
       expect(output).toBeDefined();
       expect(output).toEqual(response);
+    });
+  });
+
+  describe('push notifications', () => {
+    const CITY_ID = '2041dbfb-f0ee-43d2-9566-c041a1949207';
+    const ISSUE_ID = '913a1ddb-9582-446e-a62b-0ec56bbf1cb8';
+    const REPORTER_ID = 'adacd030-c54c-49a1-a1bd-63fc0f32a4e1';
+    const FISCAL_ID = '5e5cae03-42db-4dc6-8e42-f739c62d346d';
+    const MANAGER_ID = '07b089f6-169d-41ac-9ccd-2fcd3707aab3';
+
+    const userWith = (id: string, role: UserRole): UserType => ({
+      id,
+      name: 'John',
+      surname: 'Doe',
+      role,
+      cityId: CITY_ID,
+    });
+
+    const openIssue = (
+      status: IssueStatus,
+      overrides: Partial<Issue> = {},
+    ): Issue => ({
+      id: ISSUE_ID,
+      status,
+      cityId: CITY_ID,
+      latitude: 'latitude',
+      longitude: 'longitude',
+      category: IssueCategory.INFRASTRUCTURE,
+      type: IssueType.ABANDONED_CONSTRUCTION,
+      description: 'description',
+      reporterId: REPORTER_ID,
+      fiscalId: FISCAL_ID,
+      managerId: MANAGER_ID,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      history: [],
+      photos: ['myphoto'],
+      ...overrides,
+    });
+
+    it('tells the reporter when a resident starts checking the issue', async () => {
+      jest.spyOn(issueRepository, 'findById').mockResolvedValueOnce(
+        openIssue(IssueStatus.WAITING_FOR_FISCAL, {
+          fiscalId: undefined,
+          managerId: undefined,
+        }),
+      );
+
+      await service.assign(ISSUE_ID, userWith(FISCAL_ID, UserRole.RESIDENT));
+
+      expect(pushService.sendToUsers).toHaveBeenCalledTimes(1);
+      expect(pushService.sendToUsers).toHaveBeenCalledWith([REPORTER_ID], {
+        title: 'Alguém foi verificar',
+        body: 'Seu relato está sendo verificado.',
+        data: { issueId: ISSUE_ID },
+      });
+    });
+
+    it('does not notify the actor when the reporter checks their own issue', async () => {
+      jest.spyOn(issueRepository, 'findById').mockResolvedValueOnce(
+        openIssue(IssueStatus.WAITING_FOR_FISCAL, {
+          fiscalId: undefined,
+          managerId: undefined,
+        }),
+      );
+
+      await service.assign(ISSUE_ID, userWith(REPORTER_ID, UserRole.RESIDENT));
+
+      expect(pushService.sendToUsers).not.toHaveBeenCalled();
+    });
+
+    it('tells the reporter when the issue is accepted and sent to the city', async () => {
+      jest
+        .spyOn(issueRepository, 'findById')
+        .mockResolvedValueOnce(openIssue(IssueStatus.WAITING_FOR_PROCEDURE));
+
+      await service.accept(
+        ISSUE_ID,
+        { description: 'valid' },
+        userWith(FISCAL_ID, UserRole.RESIDENT),
+      );
+
+      expect(pushService.sendToUsers).toHaveBeenCalledWith([REPORTER_ID], {
+        title: 'Seu relato foi confirmado e enviado para a prefeitura',
+        body: 'Acompanhe o chamado no app.',
+        data: { issueId: ISSUE_ID },
+      });
+    });
+
+    it('tells the reporter when a manager starts resolving the issue', async () => {
+      jest
+        .spyOn(issueRepository, 'findById')
+        .mockResolvedValueOnce(
+          openIssue(IssueStatus.WAITING_FOR_MANAGER, { managerId: undefined }),
+        );
+
+      await service.assign(ISSUE_ID, userWith(MANAGER_ID, UserRole.MANAGER));
+
+      expect(pushService.sendToUsers).toHaveBeenCalledWith([REPORTER_ID], {
+        title: 'A prefeitura começou a resolver',
+        body: 'Acompanhe o chamado no app.',
+        data: { issueId: ISSUE_ID },
+      });
+    });
+
+    it('tells the reporter and the fiscal when a resolution needs confirmation', async () => {
+      jest
+        .spyOn(issueRepository, 'findById')
+        .mockResolvedValueOnce(
+          openIssue(IssueStatus.WAITING_FOR_MANAGER_RESOLUTION),
+        );
+
+      await service.resolution(
+        ISSUE_ID,
+        { description: 'fixed' },
+        userWith(MANAGER_ID, UserRole.MANAGER),
+      );
+
+      expect(pushService.sendToUsers).toHaveBeenCalledTimes(2);
+      expect(pushService.sendToUsers).toHaveBeenCalledWith([REPORTER_ID], {
+        title: 'A prefeitura informou que resolveu. Confirme',
+        body: 'Abra o chamado e confirme se o problema foi resolvido.',
+        data: { issueId: ISSUE_ID },
+      });
+      expect(pushService.sendToUsers).toHaveBeenCalledWith([FISCAL_ID], {
+        title: 'Solução para confirmar',
+        body: 'Um chamado que você verificou tem solução para confirmar.',
+        data: { issueId: ISSUE_ID },
+      });
+    });
+
+    it('does not notify when the issue is solved', async () => {
+      jest
+        .spyOn(issueRepository, 'findById')
+        .mockResolvedValueOnce(
+          openIssue(IssueStatus.WAITING_FOR_RESOLUTION_VALIDATION),
+        );
+
+      await service.solve(
+        ISSUE_ID,
+        { description: 'confirmed' },
+        userWith(REPORTER_ID, UserRole.RESIDENT),
+      );
+
+      expect(pushService.sendToUsers).not.toHaveBeenCalled();
+    });
+
+    it('does not wait for the push to finish before answering', async () => {
+      jest
+        .spyOn(issueRepository, 'findById')
+        .mockResolvedValueOnce(openIssue(IssueStatus.WAITING_FOR_PROCEDURE));
+      jest
+        .spyOn(pushService, 'sendToUsers')
+        .mockReturnValueOnce(new Promise(() => undefined));
+
+      await expect(
+        service.accept(
+          ISSUE_ID,
+          { description: 'valid' },
+          userWith(FISCAL_ID, UserRole.RESIDENT),
+        ),
+      ).resolves.toBeUndefined();
     });
   });
 });
