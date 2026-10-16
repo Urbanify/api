@@ -43,6 +43,18 @@ describe('MailService', () => {
     );
   });
 
+  it('sends reply_to when a reply address is given', async () => {
+    const fetchSpy = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValueOnce({ ok: true } as Response);
+
+    await new MailService().send({ ...input, replyTo: 'lead@example.com' });
+
+    expect(JSON.parse(fetchSpy.mock.calls[0][1].body as string)).toEqual(
+      expect.objectContaining({ reply_to: 'lead@example.com' }),
+    );
+  });
+
   it('throws when Resend responds with an error', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValueOnce({
       ok: false,

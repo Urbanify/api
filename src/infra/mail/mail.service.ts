@@ -25,6 +25,7 @@ export class MailService {
         subject: input.subject,
         html: input.html,
         text: input.text,
+        reply_to: input.replyTo,
       }),
     });
 

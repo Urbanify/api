@@ -3,4 +3,5 @@ export type SendMailDto = {
   subject: string;
   html: string;
   text: string;
+  replyTo?: string;
 };
