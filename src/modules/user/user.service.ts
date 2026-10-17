@@ -1,7 +1,7 @@
 import { UserRepository } from '@infra/database/prisma/repositories/user/user.repository';
+import { UserRole } from '@modules/auth/entities/user.entity';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserType } from '@shared/decorators/active-user.decorator';
-import { UserRole } from 'src/modules/auth/entities/user.entity';
 
 import { ListUsersQueryDto } from './dto/list-users.dto';
 
