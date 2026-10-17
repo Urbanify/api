@@ -116,4 +116,9 @@ export class UserService {
 
     return user;
   }
+
+  // Issues keep their history with the reporter set to null; comments and devices are removed with the user.
+  public async deleteMe(userId: string) {
+    await this.userRepository.deleteById(userId);
+  }
 }

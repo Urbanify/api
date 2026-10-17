@@ -30,6 +30,23 @@ function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
+function isReviewLogin(email: string) {
+  return (
+    !!env.reviewEmail &&
+    !!env.reviewCode &&
+    email === normalizeEmail(env.reviewEmail)
+  );
+}
+
+function reviewCodeMatches(code: string) {
+  const expected = Buffer.from(env.reviewCode ?? '');
+  const received = Buffer.from(code);
+
+  return (
+    expected.length === received.length && timingSafeEqual(expected, received)
+  );
+}
+
 function hashCode(email: string, code: string) {
   return createHmac('sha256', env.jwtSecret)
     .update(`${email}:${code}`)
@@ -100,6 +117,10 @@ export class AuthService {
   public async requestOtp(requestOtpDto: RequestOtpDto) {
     const email = normalizeEmail(requestOtpDto.email);
 
+    if (isReviewLogin(email)) {
+      return { ok: true };
+    }
+
     const lastCode = await this.loginCodeRepository.findLatestByEmail(email);
 
     if (
@@ -142,6 +163,14 @@ Vale por 10 minutos. Se não foi você, ignore este e-mail.`,
     const invalidCode = () =>
       new BadRequestException('invalid or expired code');
 
+    if (isReviewLogin(email)) {
+      if (!reviewCodeMatches(verifyOtpDto.code)) {
+        throw invalidCode();
+      }
+
+      return this.loginOrSignupToken(email);
+    }
+
     const loginCode = await this.loginCodeRepository.findLatestByEmail(email);
 
     if (!loginCode) {
@@ -166,9 +195,13 @@ Vale por 10 minutos. Se não foi você, ignore este e-mail.`,
       throw invalidCode();
     }
 
-    const user = await this.userRepository.findByEmail(email);
-
     await this.loginCodeRepository.deleteByEmail(email);
+
+    return this.loginOrSignupToken(email);
+  }
+
+  private async loginOrSignupToken(email: string) {
+    const user = await this.userRepository.findByEmail(email);
 
     if (!user) {
       const signupToken = await this.jwtService.signAsync(

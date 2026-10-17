@@ -14,6 +14,7 @@ import { IssueModule } from './modules/issue/issue.module';
 import { LeadModule } from './modules/lead/lead.module';
 import { PlaceModule } from './modules/place/place.module';
 import { PushModule } from './modules/push/push.module';
+import { ReportModule } from './modules/report/report.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -33,6 +34,7 @@ import { UserModule } from './modules/user/user.module';
     PlaceModule,
     LeadModule,
     PushModule,
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [AppService],

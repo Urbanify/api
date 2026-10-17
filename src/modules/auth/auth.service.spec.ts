@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { LoginCode } from '@prisma/client';
 
+import { env } from '@shared/env';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { User, UserRole } from './entities/user.entity';
@@ -416,6 +417,50 @@ describe('AuthService', () => {
       ).rejects.toThrow(new BadRequestException(invalidCodeMessage));
 
       expect(jwtService.signAsync).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('store review login', () => {
+    beforeEach(() => {
+      env.reviewEmail = 'Review@Urbanify.com.br';
+      env.reviewCode = '424242';
+    });
+
+    afterEach(() => {
+      env.reviewEmail = undefined;
+      env.reviewCode = undefined;
+    });
+
+    it('does not send an email for the review account', async () => {
+      await expect(
+        service.requestOtp({ email: 'review@urbanify.com.br' }),
+      ).resolves.toEqual({ ok: true });
+
+      expect(mailService.send).not.toHaveBeenCalled();
+      expect(loginCodeRepository.create).not.toHaveBeenCalled();
+    });
+
+    it('logs the review account in with the fixed code', async () => {
+      (userRepository.findByEmail as jest.Mock).mockResolvedValue(user);
+
+      const result = await service.verifyOtp({
+        email: 'review@urbanify.com.br',
+        code: '424242',
+      });
+
+      expect(result).toHaveProperty('token');
+    });
+
+    it('rejects a wrong code for the review account', async () => {
+      await expect(
+        service.verifyOtp({ email: 'review@urbanify.com.br', code: '000000' }),
+      ).rejects.toThrow(invalidCodeMessage);
+    });
+
+    it('does not accept the fixed code for other emails', async () => {
+      await expect(
+        service.verifyOtp({ email: 'other@urbanify.com.br', code: '424242' }),
+      ).rejects.toThrow(invalidCodeMessage);
     });
   });
 });

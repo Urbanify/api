@@ -36,13 +36,14 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  issuesReported Issue[]        @relation("reporter")
-  issuesFiscal   Issue[]        @relation("fiscal")
-  issuesManaged  Issue[]        @relation("manager")
+  issuesReported Issue[]         @relation("reporter")
+  issuesFiscal   Issue[]         @relation("fiscal")
+  issuesManaged  Issue[]         @relation("manager")
   issueHistory   IssueHistory[]
   comments       Comment[]
   deviceTokens   DeviceToken[]
-  city           City?          @relation(fields: [cityId], references: [id], onDelete: SetNull)
+  contentReports ContentReport[]
+  city           City?           @relation(fields: [cityId], references: [id], onDelete: SetNull)
 
   @@map("users")
 }
@@ -390,4 +391,26 @@ model DeviceToken {
 
   @@index([userId])
   @@map("device_tokens")
+}
+
+enum ReportTargetType {
+  ISSUE
+  COMMENT
+
+  @@map("report_target_type")
+}
+
+// Store policy for user generated content: anyone can flag an issue or a comment for review.
+model ContentReport {
+  id         String           @id @default(uuid()) @db.Uuid
+  reporterId String?          @db.Uuid
+  targetType ReportTargetType
+  targetId   String           @db.Uuid
+  reason     String
+  createdAt  DateTime         @default(now())
+
+  reporter User? @relation(fields: [reporterId], references: [id], onDelete: SetNull)
+
+  @@index([targetType, targetId])
+  @@map("content_reports")
 }

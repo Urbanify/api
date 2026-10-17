@@ -57,6 +57,17 @@ export class UserRepository {
     return UserModelToEntityMapper.map(userModel);
   }
 
+  public async deleteById(id: string): Promise<void> {
+    // The history keeps the user name as text, so it is erased before the user row goes away.
+    await this.prismaService.$transaction([
+      this.prismaService.issueHistory.updateMany({
+        where: { userId: id },
+        data: { userName: 'Usuário removido' },
+      }),
+      this.prismaService.user.delete({ where: { id } }),
+    ]);
+  }
+
   public async update(user: User): Promise<void> {
     const data = UserEntityToModelMapper.map(user);
 

@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Query,
@@ -63,5 +66,13 @@ export class UserController {
   @UseInterceptors(AuthValidationInterceptor)
   public async getMe(@ActiveUser() userType: UserType) {
     return this.userService.getMe(userType.id);
+  }
+
+  @Delete('me')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete the account of the current user' })
+  @UseInterceptors(AuthValidationInterceptor)
+  public async deleteMe(@ActiveUser() userType: UserType) {
+    await this.userService.deleteMe(userType.id);
   }
 }

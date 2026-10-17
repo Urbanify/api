@@ -30,6 +30,15 @@ class Env {
   @IsOptional()
   @IsString()
   expoAccessToken?: string;
+
+  // Store reviewers cannot read an inbox: this email logs in with the fixed code, without sending mail.
+  @IsOptional()
+  @IsString()
+  reviewEmail?: string;
+
+  @IsOptional()
+  @IsString()
+  reviewCode?: string;
 }
 
 export const env: Env = plainToInstance(Env, {
@@ -43,6 +52,8 @@ export const env: Env = plainToInstance(Env, {
   frontendUrl: process.env.FRONTEND_URL,
   sheetsWebhookUrl: process.env.SHEETS_WEBHOOK_URL,
   expoAccessToken: process.env.EXPO_ACCESS_TOKEN,
+  reviewEmail: process.env.REVIEW_EMAIL,
+  reviewCode: process.env.REVIEW_CODE,
 });
 
 const errors = validateSync(env);
