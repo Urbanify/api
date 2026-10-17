@@ -11,8 +11,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { LoginCode } from '@prisma/client';
-
 import { env } from '@shared/env';
+
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { User, UserRole } from './entities/user.entity';

@@ -1,9 +1,9 @@
 import { PrismaService } from '@infra/database/prisma/prisma.service';
+import { UserRole } from '@modules/auth/entities/user.entity';
 import { NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { ReportTargetType } from '@prisma/client';
 import { UserType } from '@shared/decorators/active-user.decorator';
-import { UserRole } from 'src/modules/auth/entities/user.entity';
 
 import { ReportService } from './report.service';
 

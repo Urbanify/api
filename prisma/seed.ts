@@ -44,6 +44,15 @@ const USERS: {
     role: 'RESIDENT',
   },
   {
+    // Login of the App Store and Google Play reviewers (REVIEW_EMAIL and REVIEW_CODE in the API).
+    key: 'revisao',
+    name: 'Revisão',
+    surname: 'Urbanify',
+    email: 'revisao@urbanify.com.br',
+    cpf: '31415926535',
+    role: 'RESIDENT',
+  },
+  {
     key: 'ana',
     name: 'Ana',
     surname: 'Souza',

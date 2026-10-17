@@ -33,6 +33,12 @@ services:
       # Apps Script web app URL that appends leads to the internal sheet. If left empty, rows are skipped.
       - key: SHEETS_WEBHOOK_URL
         sync: false
+      # Login of the store reviewers: this email signs in with the fixed code, without sending mail.
+      # The code is in apps/mobile/fastlane/metadata/review_information/demo_password.txt (not in Git).
+      - key: REVIEW_EMAIL
+        value: revisao@urbanify.com.br
+      - key: REVIEW_CODE
+        sync: false
       # Expo access token for push notifications. Optional: sends work without it.
       - key: EXPO_ACCESS_TOKEN
         sync: false
